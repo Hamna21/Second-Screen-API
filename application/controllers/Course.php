@@ -170,6 +170,7 @@ class Course extends CI_Controller
         }
     }
 
+    //----------------CHECKING-------------------------//
     public function check()
     {
         if($this->input->server('REQUEST_METHOD')== "POST")
@@ -179,9 +180,58 @@ class Course extends CI_Controller
                 'api_name' => $data->name
             );
 
-            echo json_encode(array('status' => "success", "dashboard_name" => $tester_data['api_name']));
+            echo json_encode(array('status' => "bla bla", "dashboard_name" => $tester_data['api_name']));
             return;
         }
     }
 
+    public function checkCourse()
+    {
+        if ($this->input->server('REQUEST_METHOD') == "POST") {
+            $data = json_decode(file_get_contents("php://input"));
+            $course_data = array(
+                'course_Name' => $data->course_Name,
+                'course_Description' => $data->course_Description,
+                'category_ID' => $data->category_ID,
+                'teacher_ID' => $data->teacher_ID,
+                'course_Image' => $data->course_Image
+            );
+
+
+            $this->form_validation->set_data($course_data); //Setting Data
+            $this->form_validation->set_rules($this->Course_model->getCourseRegistrationRules()); //Setting Rules
+
+            //Reloading add course page with same fields if validation fails
+            if ($this->form_validation->run() == FALSE) {
+                $error_data = array(
+                    'courseName_Error' => form_error('course_Name'),
+                    'courseDescription_Error' => form_error('course_Description'),
+                    'categoryID_Error' => form_error('category_ID'),
+                    'teacherID_Error' => form_error('teacher_ID')
+                );
+
+                echo json_encode(array('status' => "Error in Validation", 'error_messages' => $error_data));
+                return;
+            }
+
+
+            $url = $course_data['course_Image'];
+            $contents = file_get_contents($url);
+            $save_path="./uploads/2.jpg";
+            file_put_contents($save_path,$contents);
+
+            $course_data['course_Image'] = 1;
+            $course_data['course_ThumbImage'] = 2;
+
+            if ($this->Course_model->insertCourse($course_data)) {
+                echo json_encode(array('status' => "Success"));
+                return;
+            }
+            else
+            {
+                echo json_encode(array('status' => "Error in DB"));
+                return;
+            }
+        }
+    }
 }

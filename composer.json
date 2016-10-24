@@ -18,5 +18,11 @@
 	},
 	"require-dev": {
 		"mikey179/vfsStream": "1.1.*"
-	}
+	},
+    "require": {
+      "guzzlehttp/guzzle": "~6.0"
+    },
+    "require": {
+      "rmccue/requests": ">=1.0"
+    }
 }

@@ -79,4 +79,45 @@ class Course_model extends CI_Model
     }
 
 
+    //-------------TESTING-------------------
+
+    //Course Registration Validation rules!
+    public function getCourseRegistrationRules()
+    {
+        $config = array(
+            array(
+                'field' => 'course_Name',
+                'label' => 'Course Name',
+                'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]|is_unique[Course.course_Name]'
+            ),
+
+            array(
+                'field' => 'course_Description',
+                'label' => 'Course Description',
+                'rules' => 'required'
+            ),
+            array(
+                'field' => 'category_ID',
+                'label' => 'Category',
+                'rules' => 'required'
+            ),
+            array(
+                'field' => 'teacher_ID',
+                'label' => 'Teacher',
+                'rules' => 'required'
+            )
+        );
+
+        return $config;
+    }
+
+    //Inserting new Course in table
+    public function insertCourse($courseData)
+    {
+        if($this->db->insert('course', $courseData))
+        {
+            return true;
+        }
+    }
+
 }
