@@ -9,29 +9,11 @@ class user_model extends CI_Model
 
 //---------------------SELECT---------------------------
 
-    //Getting user for login
-    public function get_user_login($email, $password)
-    {
-        $query = $this->db
-            ->select('user_ID, user_Name, image_Path')
-            ->where('email',  $email )
-            ->where('password', $password)
-            ->get('user');
-
-        if ( $query->num_rows() > 0 ) {
-            $row = $query->row_array();
-            return $row;
-        }
-        else{
-            return null;
-        }
-    }
-
     //Getting user via email
     public function get_user($email)
     {
         $query = $this->db
-            ->select('user_ID,user_Name, image_Path')
+            ->select('user_ID, first_Name, last_Name, user_Name, email, image_Path')
             ->where('email',  $email )
             ->get('user');
 
@@ -48,7 +30,7 @@ class user_model extends CI_Model
     public function get_user_id($id)
     {
         $query = $this->db
-            ->select('user_ID,user_Name, image_Path')
+            ->select('user_ID,user_Name, first_Name, last_Name, email, image_Path')
             ->where('user_ID',  $id)
             ->get('user');
 
@@ -61,6 +43,61 @@ class user_model extends CI_Model
         }
     }
 
+    //Getting USER for login
+    public function get_login_user($data)
+    {
+        $query = $this->db
+            ->select('user_ID, first_Name, last_Name, user_Name, email, image_Path, isReset')
+            ->where('email',  $data['email'] )
+            ->where('password', $data['password'])
+            ->get('user');
+
+        if ( $query->num_rows() > 0 )
+        {
+            $row = $query->row_array();
+            return $row;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    //Getting USER/ADMIN for login
+    public function get_login_admin($data)
+    {
+        $query = $this->db
+            ->where('email',  $data['email'] )
+            ->where('password', $data['password'])
+            ->get('admin');
+
+        if ( $query->num_rows() > 0 )
+        {
+            $row = $query->row_array();
+            return $row;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    //Getting user via email
+    public function isValidHash($hash)
+    {
+        $query = $this->db
+            ->where('reset_hash',  $hash)
+            ->get('user');
+
+        if ( $query->num_rows() > 0 ) {
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+
 //---------------------INSERT---------------------------
 
     //Sign up process - inserting new user!
@@ -72,6 +109,22 @@ class user_model extends CI_Model
         }
     }
 
+    public function insert_reset($userid,$data)
+    {
+        $this->db->trans_start();
+        $this->db->where('user_ID', $userid);
+        $this->db->update('user', $data);
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === TRUE)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
 //---------------------UPDATE----------------------------
     //Updating a user profile via ID
@@ -94,11 +147,11 @@ class user_model extends CI_Model
 
 
     //Updating password by matching email
-    public function update_password($email_user, $data)
+    public function update_password($reset_hash, $data)
     {
-        //Updating password by matching email
+        //Updating password by matching hash
         $this->db->trans_start();
-        $this->db->where('email', $email_user);
+        $this->db->where('reset_hash', $reset_hash);
         $this->db->update('user', $data);
         $this->db->trans_complete();
 
@@ -107,11 +160,11 @@ class user_model extends CI_Model
         //$this->db->affected_rows() == '1'
         if ($this->db->trans_status() === TRUE)
         {
-            return $this->get_user($email_user);
+            return true;
         }
         else
         {
-            return null;
+            return false;
         }
 
         /*if ($this->db->trans_status() === FALSE)
@@ -121,7 +174,7 @@ class user_model extends CI_Model
 
     }
 
-//---------------------session Table----------------------
+//---------------------Session Table----------------------
 
     //Logging out user!
     public function delete_session($user_id)
@@ -143,13 +196,13 @@ class user_model extends CI_Model
     //Setting session table
     public function insert_session($data)
     {
-        if(!($this->db->insert('session', $data)))
+        if($this->db->insert('session', $data))
         {
-            return false;
+            return true;
         }
+
         // $this->db->set('login_time', 'NOW()', FALSE);
         // set should come before insert to work properly -
-        return true;
     }
 
     //Checking whether user is logged-in
@@ -205,14 +258,14 @@ class user_model extends CI_Model
         return $config;
     }
 
-    //Login Validation Rules!
+    //Login Validation Rules for USER/ADMIN
     public function getLoginRules()
     {
         $config = array(
             array(
                 'field' => 'email',
                 'label' => 'Email',
-                'rules' => 'required|valid_email'
+                'rules' => 'trim|required|valid_email'
             ),
             array(
                 'field' => 'password',
@@ -254,7 +307,5 @@ class user_model extends CI_Model
 
         return $config;
     }
-
-
 
 }

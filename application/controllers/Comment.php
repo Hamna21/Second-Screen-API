@@ -54,7 +54,7 @@ class Comment extends CI_Controller
 
             }
 
-            echo json_encode(array('status' => "success", "Comments" => $myArray));
+            echo json_encode(array('status' => "success", "comments" => $myArray));
             return;
         }
     }

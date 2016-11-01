@@ -7,12 +7,13 @@ class Course_model extends CI_Model
         $this->load->database();
     }
 
+    //------SELECT-----------
     //Return all courses
     public function get_courses_old()
     {
         $query = $this->db
             ->select('course_ID, course_Name')
-            ->order_by('course_ID', ASC)
+            ->order_by('course_ID', 'ASC')
             ->get('course');
 
         return $query->result_array();
@@ -25,6 +26,19 @@ class Course_model extends CI_Model
         $this->db->from('course');
         $this->db->join('category', 'course.category_ID= category.category_ID');
         $this->db->join('teacher', 'course.teacher_ID= teacher.teacher_ID');
+        $this->db->order_by('course_ID', 'DESC');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+    //Get all courses within limit for pagination
+    public function get_courses_limit($limit, $start)
+    {
+        $this->db->limit($limit, $start);
+        $this->db->from('course');
+        $this->db->join('category', 'course.category_ID= category.category_ID');
+        $this->db->join('teacher', 'course.teacher_ID= teacher.teacher_ID');
+        $this->db->order_by('course_ID', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -56,12 +70,22 @@ class Course_model extends CI_Model
 
     }
 
-    //Adding course of a user!
-    public function insert_user_course($data)
+    //Get a single course by ID - Using JOIN
+    public function get_course_join($courseID)
     {
-        if ($this->db->insert("user_course", $data)) {
-            return true;
-        }
+        $this->db->from('course');
+        $this->db->join('category', 'course.category_ID= category.category_ID');
+        $this->db->join('teacher', 'course.teacher_ID= teacher.teacher_ID');
+        $this->db->where('course_ID', $courseID);
+        $query = $this->db->get();
+        return $query->row_array();
+    }
+
+    //Getting total count of Courses
+    public function getCourseTotal()
+    {
+        $this->db->from('course');
+        return $this->db->count_all_results();
     }
 
     //Get Registered courses of a user!
@@ -78,8 +102,59 @@ class Course_model extends CI_Model
 
     }
 
+    //------INSERT----------
+    //Adding course of a user!
+    public function insert_user_course($data)
+    {
+        if ($this->db->insert("user_course", $data)) {
+            return true;
+        }
+    }
 
-    //-------------TESTING-------------------
+    //Inserting new Course in table
+    public function insertCourse($courseData)
+    {
+        if($this->db->insert('course', $courseData))
+        {
+            return true;
+        }
+    }
+
+
+    //Update a course by its ID
+    public function updateCourse($courseID, $courseData)
+    {
+        $this->db->where("course_ID", $courseID);
+        $this->db->update("course", $courseData);
+        return true;
+    }
+
+    //-------------DELETE-------------------//
+
+    //Delete a course by its ID
+    public function deleteCourse($courseID)
+    {
+        $this->db->where('course_ID', $courseID);
+        $this->db->delete('course');
+        return true;
+    }
+
+    //----AJAX HELPER FUNCTION
+
+    //Finding a course by its Name - checking if exists in DB
+    public function getCourse_Name($q)
+    {
+        $exist = "Course Name already exists - Try Again!";
+        $query = $this->db
+            ->where('course_Name',$q)
+            ->get('course');
+        if($query->num_rows() > 0)
+        {
+            return $exist;
+        }
+    }
+
+    //-------------Validation-------------------
 
     //Course Registration Validation rules!
     public function getCourseRegistrationRules()
@@ -88,9 +163,38 @@ class Course_model extends CI_Model
             array(
                 'field' => 'course_Name',
                 'label' => 'Course Name',
-                'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]|is_unique[Course.course_Name]'
+                'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]|is_unique[course.course_Name]'
             ),
 
+            array(
+                'field' => 'course_Description',
+                'label' => 'Course Description',
+                'rules' => 'required'
+            ),
+            array(
+                'field' => 'category_ID',
+                'label' => 'Category',
+                'rules' => 'required'
+            ),
+            array(
+                'field' => 'teacher_ID',
+                'label' => 'Teacher',
+                'rules' => 'required'
+            ),
+            array(
+                'field' => 'course_Image',
+                'label' => 'Course Image',
+                'rules' => 'required'
+            )
+        );
+
+        return $config;
+    }
+
+    //Course Edit Validation rules!
+    public function getCourseEditRules()
+    {
+        $config = array(
             array(
                 'field' => 'course_Description',
                 'label' => 'Course Description',
@@ -111,13 +215,6 @@ class Course_model extends CI_Model
         return $config;
     }
 
-    //Inserting new Course in table
-    public function insertCourse($courseData)
-    {
-        if($this->db->insert('course', $courseData))
-        {
-            return true;
-        }
-    }
+
 
 }
