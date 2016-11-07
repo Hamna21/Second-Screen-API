@@ -59,8 +59,8 @@ class Teacher extends CI_Controller
     {
         if($this->input->server('REQUEST_METHOD') == "GET")
         {
-            $teacherID = $_REQUEST["teacherID"];
-            $teacher = $this->Teacher_model->get_teacher($teacherID);
+            $teacher_id = $_REQUEST["teacher_id"];
+            $teacher = $this->Teacher_model->get_teacher($teacher_id);
             if(!$teacher)
             {
                 echo json_encode(array('status' => "error", "error_message" => "No teacher found!"));
@@ -76,10 +76,10 @@ class Teacher extends CI_Controller
         if ($this->input->server('REQUEST_METHOD') == "POST") {
             $data = json_decode(file_get_contents("php://input"));
             $teacher_data = array(
-                'teacher_Name' => $data->teacher_Name,
-                'teacher_Designation' => $data->teacher_Designation,
-                'teacher_Domain' => $data->teacher_Domain,
-                'teacher_Image' => $data->teacher_Image
+                'teacher_name' => $data->teacher_Name,
+                'teacher_designation' => $data->teacher_Designation,
+                'teacher_domain' => $data->teacher_Domain,
+                'teacher_image' => $data->teacher_Image
             );
 
             $this->form_validation->set_data($teacher_data); //Setting Data
@@ -98,14 +98,14 @@ class Teacher extends CI_Controller
                 return;
             }
 
-            $imageName = substr($teacher_data['teacher_Image'],strrpos($teacher_data['teacher_Image'],"/")+1);
-            $url = $teacher_data['teacher_Image'];
+            $imageName = substr($teacher_data['teacher_image'],strrpos($teacher_data['teacher_image'],"/")+1);
+            $url = $teacher_data['teacher_image'];
             $contents = file_get_contents($url);
             $save_path="./uploads/". $imageName;
 
             file_put_contents($save_path,$contents);
-            $teacher_data['teacher_Image'] =  $imageName;
-            $teacher_data['teacher_ThumbImage'] =  createThumbnail($imageName);
+            $teacher_data['teacher_image'] =  $imageName;
+            $teacher_data['teacher_thumbimage'] =  createThumbnail($imageName);
 
             if ($this->Teacher_model->insertTeacher($teacher_data)) {
                 echo json_encode(array('status' => "success"));
@@ -124,11 +124,11 @@ class Teacher extends CI_Controller
     {
         if ($this->input->server('REQUEST_METHOD') == "POST") {
             $data = json_decode(file_get_contents("php://input"));
-            $teacherID = $data->teacher_ID;
+            $teacher_id = $data->teacher_ID;
             $teacher_data = array(
-                'teacher_Name' => $data->teacher_Name,
-                'teacher_Designation' => $data->teacher_Designation,
-                'teacher_Domain' => $data->teacher_Domain
+                'teacher_name' => $data->teacher_Name,
+                'teacher_designation' => $data->teacher_Designation,
+                'teacher_domain' => $data->teacher_Domain
             );
 
             $this->form_validation->set_data($teacher_data); //Setting Data
@@ -162,11 +162,11 @@ class Teacher extends CI_Controller
                 $save_path="./uploads/". $imageName;
 
                 file_put_contents($save_path,$contents);
-                $teacher_data['teacher_Image'] =  $imageName;
-                $teacher_data['teacher_ThumbImage'] =  createThumbnail($imageName);
+                $teacher_data['teacher_image'] =  $imageName;
+                $teacher_data['teacher_thumbimage'] =  createThumbnail($imageName);
 
             }
-            if ($this->Teacher_model->updateTeacher($teacherID,$teacher_data)) {
+            if ($this->Teacher_model->updateTeacher($teacher_id,$teacher_data)) {
                 echo json_encode(array('status' => "success"));
                 return;
             }
@@ -181,21 +181,20 @@ class Teacher extends CI_Controller
     public function deleteTeacher()
     {
         if($this->input->server('REQUEST_METHOD') == "GET") {
-            $teacherID = $_REQUEST["teacherID"];
-            $teacher = $this->Teacher_model->get_teacher($teacherID);
+            $teacher_id = $_REQUEST["teacher_id"];
+            $teacher = $this->Teacher_model->get_teacher($teacher_id);
 
             //Delete images from API server
 
-            unlink("uploads/".$teacher['teacher_ThumbImage']);
-            unlink("uploads/".$teacher['teacher_Image']);
-            if($this->Teacher_model->deleteTeacher($teacherID))
+            unlink("uploads/".$teacher['teacher_thumbimage']);
+            unlink("uploads/".$teacher['teacher_image']);
+            if($this->Teacher_model->deleteTeacher($teacher_id))
             {
                 echo json_encode(array('status' => "success"));
                 return;
             }
             echo json_encode(array('status' => "error"));
             return;
-
         }
     }
 }

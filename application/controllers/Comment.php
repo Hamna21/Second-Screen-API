@@ -44,12 +44,12 @@ class Comment extends CI_Controller
             foreach($comments as $comment)
             {
                 //Getting user of each comment
-                $user = $this->User_model->get_user_id($comment['user_ID']);
+                $user = $this->User_model->get_user_id($comment['user_id']);
 
                 //Storing each comment and user in Array as object!
                 $object = new stdClass();
                 $object->comment = $comment['comment_text'];
-                $object->user = array('user_ID' => $user['user_ID'], 'user_Name' => $user['user_Name'], 'user_Image' => $user['image_Path']  );
+                $object->user = array('user_id' => $user['user_id'], 'user_name' => $user['user_name'], 'user_image' => $user['user_image']  );
                 $myArray[] = $object;
 
             }
@@ -65,8 +65,8 @@ class Comment extends CI_Controller
         {
             $data = json_decode(file_get_contents("php://input"));
             $comment_data = array(
-                'user_ID' => $data->user_ID,
-                'course_ID' => $data->course_ID,
+                'user_id' => $data->user_id,
+                'course_id' => $data->course_id,
                 'comment_text' => $data->comment
             );
 
@@ -77,6 +77,8 @@ class Comment extends CI_Controller
                 return;
             }
 
+
+            $comment_data['comment_time'] = date('Y-m-d H:i:s');
 
             if($this->Comment_model->create_comment($comment_data))
             {

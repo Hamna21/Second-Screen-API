@@ -59,7 +59,7 @@ class Lecture extends CI_Controller
     {
         if($this->input->server('REQUEST_METHOD') == "GET")
         {
-            $lectureID = $_REQUEST["lectureID"];
+            $lectureID = $_REQUEST["lecture_id"];
             $lecture = $this->Lecture_model->get_lecture($lectureID);
             if(!$lecture)
             {
@@ -76,11 +76,11 @@ class Lecture extends CI_Controller
         if ($this->input->server('REQUEST_METHOD') == "POST") {
             $data = json_decode(file_get_contents("php://input"));
             $lecture_data = array(
-                'lecture_Name' => $data->lecture_Name,
-                'lecture_Description' => $data->lecture_Description,
+                'lecture_name' => $data->lecture_Name,
+                'lecture_description' => $data->lecture_Description,
                 'lecture_start' => $data->lecture_start,
                 'lecture_end' => $data->lecture_end,
-                'course_ID' => $data->course_ID
+                'course_id' => $data->course_ID
             );
 
             $this->form_validation->set_data($lecture_data); //Setting Data
@@ -118,13 +118,13 @@ class Lecture extends CI_Controller
     {
         if ($this->input->server('REQUEST_METHOD') == "POST") {
             $data = json_decode(file_get_contents("php://input"));
-            $lectureID = $data->lecture_ID;
+            $lecture_id = $data->lecture_ID;
             $lecture_data = array(
-                'lecture_Name' => $data->lecture_Name,
-                'lecture_Description' => $data->lecture_Description,
+                'lecture_name' => $data->lecture_Name,
+                'lecture_description' => $data->lecture_Description,
                 'lecture_start' => $data->lecture_start,
                 'lecture_end' => $data->lecture_end,
-                'course_ID' => $data->course_ID
+                'course_id' => $data->course_ID
             );
 
             $this->form_validation->set_data($lecture_data); //Setting Data
@@ -144,7 +144,7 @@ class Lecture extends CI_Controller
                 return;
             }
 
-            if ($this->Lecture_model->updateLecture($lectureID,$lecture_data)) {
+            if ($this->Lecture_model->updateLecture($lecture_id,$lecture_data)) {
                 echo json_encode(array('status' => "success"));
                 return;
             }
@@ -162,8 +162,8 @@ class Lecture extends CI_Controller
     public function deleteLecture()
     {
         if($this->input->server('REQUEST_METHOD') == "GET") {
-            $lectureID = $_REQUEST["lectureID"];
-            if($this->Lecture_model->deleteLecture($lectureID))
+            $lecture_id = $_REQUEST["lecture_id"];
+            if($this->Lecture_model->deleteLecture($lecture_id))
             {
                 echo json_encode(array('status' => "success"));
                 return;

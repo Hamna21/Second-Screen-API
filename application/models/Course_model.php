@@ -12,8 +12,8 @@ class Course_model extends CI_Model
     public function get_courses_old()
     {
         $query = $this->db
-            ->select('course_ID, course_Name')
-            ->order_by('course_ID', 'ASC')
+            ->select('course_id, course_name')
+            ->order_by('course_id', 'ASC')
             ->get('course');
 
         return $query->result_array();
@@ -22,11 +22,11 @@ class Course_model extends CI_Model
     //Get all courses- along with teacher and category information
     public function get_courses()
     {
-        $this->db->select('course.course_ID, course.course_Name, course.course_Description, course.course_ThumbImage, teacher.teacher_Name, category.category_Name');
+        $this->db->select('course.course_id, course.course_name, course.course_description, course.course_thumbimage, teacher.teacher_name, category.category_name');
         $this->db->from('course');
-        $this->db->join('category', 'course.category_ID= category.category_ID');
-        $this->db->join('teacher', 'course.teacher_ID= teacher.teacher_ID');
-        $this->db->order_by('course_ID', 'DESC');
+        $this->db->join('category', 'course.category_id= category.category_id');
+        $this->db->join('teacher', 'course.teacher_id = teacher.teacher_id');
+        $this->db->order_by('course_id', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -36,9 +36,9 @@ class Course_model extends CI_Model
     {
         $this->db->limit($limit, $start);
         $this->db->from('course');
-        $this->db->join('category', 'course.category_ID= category.category_ID');
-        $this->db->join('teacher', 'course.teacher_ID= teacher.teacher_ID');
-        $this->db->order_by('course_ID', 'DESC');
+        $this->db->join('category', 'course.category_id= category.category_id');
+        $this->db->join('teacher', 'course.teacher_id= teacher.teacher_id');
+        $this->db->order_by('course_id', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -47,7 +47,7 @@ class Course_model extends CI_Model
     public function get_course_name($courseName)
     {
         $query = $this->db
-            ->where('course_Name', $courseName)
+            ->where('course_name', $courseName)
             ->get('course');
 
         if ($query->num_rows() > 0) {
@@ -62,7 +62,7 @@ class Course_model extends CI_Model
     public function get_course($course_ID)
     {
         $query = $this->db
-            ->where('course_ID', $course_ID)
+            ->where('course_id', $course_ID)
             ->get('course');
 
         $row = $query->row_array();
@@ -74,9 +74,9 @@ class Course_model extends CI_Model
     public function get_course_join($courseID)
     {
         $this->db->from('course');
-        $this->db->join('category', 'course.category_ID= category.category_ID');
-        $this->db->join('teacher', 'course.teacher_ID= teacher.teacher_ID');
-        $this->db->where('course_ID', $courseID);
+        $this->db->join('category', 'course.category_id= category.category_id');
+        $this->db->join('teacher', 'course.teacher_id= teacher.teacher_id');
+        $this->db->where('course_id', $courseID);
         $query = $this->db->get();
         return $query->row_array();
     }
@@ -92,9 +92,9 @@ class Course_model extends CI_Model
     public function get_user_courses($user_id)
     {
         $this->db
-            ->select('course.course_ID, course.course_Name')
+            ->select('course.course_id, course.course_name, course.course_description, course.course_image, course.course_thumbimage')
             ->from('course')
-            ->join('user_course', 'course.course_ID = user_course.course_ID')
+            ->join('user_course', 'course.course_id = user_course.course_id')
             ->where('user_ID', $user_id);
 
         $query = $this->db->get();
@@ -124,7 +124,7 @@ class Course_model extends CI_Model
     //Update a course by its ID
     public function updateCourse($courseID, $courseData)
     {
-        $this->db->where("course_ID", $courseID);
+        $this->db->where("course_id", $courseID);
         $this->db->update("course", $courseData);
         return true;
     }
@@ -134,10 +134,20 @@ class Course_model extends CI_Model
     //Delete a course by its ID
     public function deleteCourse($courseID)
     {
-        $this->db->where('course_ID', $courseID);
+        $this->db->where('course_id', $courseID);
         $this->db->delete('course');
         return true;
     }
+
+    //Adding course of a user!
+    public function delete_user_course($data)
+    {
+        $this->db->where('user_id', $data['user_id']);
+        $this->db->where('course_id', $data['course_id']);
+        $this->db->delete('user_course');
+        return true;
+    }
+
 
     //----AJAX HELPER FUNCTION
 
@@ -146,7 +156,7 @@ class Course_model extends CI_Model
     {
         $exist = "Course Name already exists - Try Again!";
         $query = $this->db
-            ->where('course_Name',$q)
+            ->where('course_name',$q)
             ->get('course');
         if($query->num_rows() > 0)
         {
@@ -161,28 +171,28 @@ class Course_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'course_Name',
+                'field' => 'course_name',
                 'label' => 'Course Name',
                 'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]|is_unique[course.course_Name]'
             ),
 
             array(
-                'field' => 'course_Description',
+                'field' => 'course_description',
                 'label' => 'Course Description',
                 'rules' => 'required'
             ),
             array(
-                'field' => 'category_ID',
+                'field' => 'category_id',
                 'label' => 'Category',
                 'rules' => 'required'
             ),
             array(
-                'field' => 'teacher_ID',
+                'field' => 'teacher_id',
                 'label' => 'Teacher',
                 'rules' => 'required'
             ),
             array(
-                'field' => 'course_Image',
+                'field' => 'course_image',
                 'label' => 'Course Image',
                 'rules' => 'required'
             )
@@ -196,17 +206,17 @@ class Course_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'course_Description',
+                'field' => 'course_description',
                 'label' => 'Course Description',
                 'rules' => 'required'
             ),
             array(
-                'field' => 'category_ID',
+                'field' => 'category_id',
                 'label' => 'Category',
                 'rules' => 'required'
             ),
             array(
-                'field' => 'teacher_ID',
+                'field' => 'teacher_id',
                 'label' => 'Teacher',
                 'rules' => 'required'
             )

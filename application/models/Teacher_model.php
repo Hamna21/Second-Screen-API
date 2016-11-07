@@ -12,7 +12,7 @@ class Teacher_model extends CI_Model
     public function get_teacher($teacher_id)
     {
         $query = $this->db
-            ->where('teacher_ID', $teacher_id)
+            ->where('teacher_id', $teacher_id)
             ->get('teacher');
 
         return $query->row_array();
@@ -22,7 +22,7 @@ class Teacher_model extends CI_Model
     public function get_teachers()
     {
         $query = $this->db
-            ->order_by('teacher_ID', "DESC")
+            ->order_by('teacher_id', "DESC")
             ->get('teacher');
         return $query->result_array();
     }
@@ -40,7 +40,7 @@ class Teacher_model extends CI_Model
     {
         $query = $this->db
             ->limit($limit, $start)
-            ->order_by('teacher_ID', "DESC")
+            ->order_by('teacher_id', "DESC")
             ->get('teacher');
 
         return $query->result_array();
@@ -61,7 +61,7 @@ class Teacher_model extends CI_Model
     //Update a teacher by its ID
     public function updateTeacher($teacherID, $teacherData)
     {
-        $this->db->where("teacher_ID", $teacherID);
+        $this->db->where("teacher_id", $teacherID);
         $this->db->update("teacher", $teacherData);
         return true;
     }
@@ -71,7 +71,7 @@ class Teacher_model extends CI_Model
     //Delete a teacher by its ID
     public function deleteTeacher($teacherID)
     {
-        $this->db->where('teacher_ID', $teacherID);
+        $this->db->where('teacher_id', $teacherID);
         $this->db->delete('teacher');
         return true;
     }
@@ -83,22 +83,22 @@ class Teacher_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'teacher_Name',
+                'field' => 'teacher_name',
                 'label' => 'Teacher Name',
                 'rules' => 'required'
             ),
             array(
-                'field' => 'teacher_Designation',
+                'field' => 'teacher_designation',
                 'label' => 'Teacher Designation',
                 'rules' => 'required|regex_match[/^[A-Za-z_ -]+$/]'
             ),
             array(
-                'field' => 'teacher_Domain',
+                'field' => 'teacher_domain',
                 'label' => 'Teacher Domain',
                 'rules' => 'required'
             ),
             array(
-                'field' => 'teacher_Image',
+                'field' => 'teacher_image',
                 'label' => 'Teacher Image',
                 'rules' => 'required'
             )
@@ -112,17 +112,17 @@ class Teacher_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'teacher_Name',
+                'field' => 'teacher_name',
                 'label' => 'Teacher Name',
                 'rules' => 'required'
             ),
             array(
-                'field' => 'teacher_Designation',
+                'field' => 'teacher_designation',
                 'label' => 'Teacher Designation',
                 'rules' => 'required|regex_match[/^[A-Za-z_ -]+$/]'
             ),
             array(
-                'field' => 'teacher_Domain',
+                'field' => 'teacher_domain',
                 'label' => 'Teacher Domain',
                 'rules' => 'required'
             )

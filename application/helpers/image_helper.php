@@ -12,7 +12,7 @@ if ( ! function_exists('uploadPicture'))
         $config['encrypt_name'] = TRUE;
 
         $CI->load->library('upload', $config);
-        if (!$CI->upload->do_upload('image_Path'))
+        if (!$CI->upload->do_upload('image_path'))
         {
             $status = 0;
             $msg = $CI->upload->display_errors('', '');

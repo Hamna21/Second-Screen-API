@@ -8,7 +8,7 @@ class User extends CI_Controller
         parent::__construct();
         header('Content-Type: application/json');
 
-        /*$userName = "Developer";
+        $userName = "Developer";
         $password = "1234";
         $authentication = $this->input->server('PHP_AUTH_USER');
         if(empty( $authentication))
@@ -20,7 +20,7 @@ class User extends CI_Controller
         {
             echo json_encode(array('status' => "error", "error_message" => "Invalid API keys."));
             die();
-        }*/
+        }
 
         $this->load->model('User_model');
         $this->load->model('Course_model');
@@ -60,7 +60,7 @@ class User extends CI_Controller
             }
 
             //Requested a password change - Cannot Log in
-            if($user['isReset'] == "yes")
+            if($user['isReset'] == 1)
             {
                 echo json_encode(array('status' => "error", "error_message" => "requested a password change"));
                 return;
@@ -68,7 +68,7 @@ class User extends CI_Controller
 
 
             //If user already logged in - then return user
-            if($this->User_model->get_user_session($user['user_ID']))
+            if($this->User_model->get_user_session($user['user_id']))
             {
                 echo json_encode(array('status' => "success", "user" => $user));
                 return;
@@ -76,7 +76,7 @@ class User extends CI_Controller
 
             //Setting SESSION_ID
             $data_session = array(
-                'user_ID' => $user['user_ID'],
+                'user_id' => $user['user_id'],
                 'login_time' => date('Y-m-d H:i:s')
             );
 
@@ -116,9 +116,9 @@ class User extends CI_Controller
         if($this->input->server('REQUEST_METHOD')== "POST") //Validating data from forms
         {
             $register_data = array(
-                'first_Name' => $this->input->post('first_Name'),
-                'last_Name' => $this->input->post('last_Name'),
-                'user_Name' => $this->input->post('user_Name'),
+                'first_name' => $this->input->post('first_name'),
+                'last_name' => $this->input->post('last_name'),
+                'user_name' => $this->input->post('user_name'),
                 'email' => $this->input->post('email'),
                 'password' => $this->input->post('password')
             );
@@ -127,9 +127,9 @@ class User extends CI_Controller
             $this->form_validation->set_rules($this->User_model->getRegistrationRules()); //Setting Rules
 
             //Setting Image Rule - Required
-            if (empty($_FILES['image_Path']['name']))
+            if (empty($_FILES['image_path']['name']))
             {
-                $this->form_validation->set_rules('image_Path', 'Image', 'required');
+                $this->form_validation->set_rules('image_path', 'Image', 'required');
             }
 
             //Checking Validations
@@ -154,7 +154,7 @@ class User extends CI_Controller
             else {
 
                 $imagePath = $image_attributes[1];
-                $register_data['image_Path'] = $imagePath;
+                $register_data['user_image'] = $imagePath;
             }
 
             //Inserting user in table
@@ -165,7 +165,7 @@ class User extends CI_Controller
 
                 //Setting SESSION_ID
                 $data_session = array(
-                    'user_ID' => $user['user_ID'],
+                    'user_id' => $user['user_id'],
                     'login_time' => date('Y-m-d H:i:s')
                 );
 
@@ -218,14 +218,14 @@ class User extends CI_Controller
             }
 
             //Generating reset_hash based on USER_ID
-            $reset_hash = base64_encode($user['user_ID']);
+            $reset_hash = base64_encode($user['user_id']);
             $reset_data = array(
                 'reset_hash' => $reset_hash,
-                'isReset' => "yes"
+                'isReset' => 1
             );
 
             //Inserting hash in DB and sending Email
-            if($this->User_model->insert_reset($user['user_ID'],$reset_data))
+            if($this->User_model->insert_reset($user['user_id'],$reset_data))
             {
                 //Sending reset password link to user
                 $url = 'http://localhost:8080/Dashboard-SS-v2/second-screen/resetPassword?reset_hash='. $reset_hash;
@@ -256,10 +256,13 @@ class User extends CI_Controller
                 }
                 else
                 {
-                    echo json_encode(array('status' => "success", "message" => "error in sending email"));
+                    echo json_encode(array('status' => "error", "message" => "error in sending email"));
                     return;
                 }
             }
+
+            echo json_encode(array('status' => "error", "message" => "error in sending email"));
+            return;
         }
     }
 
@@ -268,34 +271,51 @@ class User extends CI_Controller
         //Validating new password
         if ($this->input->server('REQUEST_METHOD') == "POST")
         {
-            $user_data = array(
-                'password' => $this->input->post('password'),
-                'reset_hash' => $this->input->post('reset_hash')
+            $data = json_decode(file_get_contents("php://input"));
+            $reset_data = array(
+                'password' => $data->password,
+                'reset_hash' => $data->reset_hash
             );
 
-            $this->form_validation->set_data($user_data);
-            $this->form_validation->set_rules('password', 'Password', 'required');
+
+            $this->form_validation->set_data($reset_data);
+            $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]|max_length[20]');
 
             if($this->form_validation->run() == FALSE) {
-                echo json_encode(array('status' => "error in validation", "error_message" => validation_errors()));
+                echo json_encode(array('status' => "error", "error_message" => validation_errors()));
                 return;
             }
 
             //Setting Parameters
-            $reset_hash = $user_data['reset_hash'];
+            $reset_hash = $data->reset_hash;
+            $new_password = $data->password;
+
+            $user = $this->User_model->get_user_hash($reset_hash);
+            if(!$user)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No user found."));
+                return;
+            }
+
+            if($new_password == $user['password'])
+            {
+                echo json_encode(array('status' => "error", "error_message" => "New password cannot be same to old password"));
+                return;
+            }
+
             $updated_password = array(
-                'password' => $user_data['password'],
-                'isReset' => 'no',
+                'password' => $new_password,
+                'isReset' => 0,
                 'reset_hash' => " "
             );
 
             //Updating password - calling model function
-            if($this->User_model->update_password($reset_hash, $updated_password))
+            if($this->User_model->update_password('reset_hash',$reset_hash, $updated_password))
             {
                 echo json_encode(array('status' => "success"));
                 return;
             }
-            echo json_encode(array('status' => "error", "error_message" => "New password cannot be same to old password!"));
+            echo json_encode(array('status' => "error", "error_message" => "Error in updating password"));
             return;
         }
     }
@@ -326,10 +346,14 @@ class User extends CI_Controller
 
     public function update_user()
     {
-        if($this->input->server("REQUEST_METHOD") == "PUT")
+        if($this->input->server("REQUEST_METHOD") == "POST")
         {
-            $data = json_decode(file_get_contents("php://input"));
-            $user_id = $data->user_id;
+            $update_data = array(
+                'first_name' => $this->input->post('first_name'),
+                'last_name' => $this->input->post('last_name')
+            );
+
+            $user_id = $this->input->post('user_id');
 
             //Checking whether user is logged-in or not!
             if(!($this->User_model->get_user_session($user_id)))
@@ -337,13 +361,6 @@ class User extends CI_Controller
                 echo json_encode(array('status' => "error", "error_message" => "User not logged in - cannot edit profile"));
                 return;
             }
-
-            $update_data = array(
-                'first_Name' => $data->first_Name,
-                'last_Name' => $data->last_Name,
-                'user_Name' => $data->user_Name,
-                'password' => $data->password
-            );
 
             //Validating data
             $this->form_validation->set_data($update_data);
@@ -354,15 +371,78 @@ class User extends CI_Controller
                 return;
             }
 
+            //If user uploaded new Image
+            if(!empty($_FILES['image_path']['name'])) {
+                //Validating image and uploading it
+                $image_attributes = uploadPicture();
+                $imageUploadStatus = $image_attributes[0];
+
+                //If imageValidation fails, then reload add course page
+                if ($imageUploadStatus == 0) {
+                    echo json_encode(array('status' => "error", "error_message" => $image_attributes[1]));
+                    return;
+                }
+
+                $update_data['course_image'] = $image_attributes[1];
+            }
+
             //Updating user by matching user_id
             $user = $this->User_model->update_user($user_id, $update_data);
-            if(!user)
+            if(!$user)
             {
                 echo json_encode(array('status' => "error", "error_message" => "Could not update User!"));
                 return;
             }
             echo json_encode(array('status' => "success", "user" => $user));
             return;
+        }
+    }
+
+    public function update_password()
+    {
+        if($this->input->server('REQUEST_METHOD') == "POST")
+        {
+            $data = json_decode(file_get_contents("php://input"));
+            $update_data = array(
+                'password' => $data->password,
+                'user_id' => $data->user_id
+            );
+
+            $this->form_validation->set_data($update_data);
+            $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]|max_length[20]');
+
+            if($this->form_validation->run() == FALSE) {
+                echo json_encode(array('status' => "error", "error_message" => validation_errors()));
+                return;
+            }
+
+            //Getting user via - information will include password too
+            $user = $this->User_model->get_user_password($update_data['user_id']);
+            if(!$user)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No user found."));
+                return;
+            }
+
+            if($update_data['password'] == $user['password'])
+            {
+                echo json_encode(array('status' => "error", "error_message" => "New password cannot be same to old password"));
+                return;
+            }
+
+
+            $update_password = array(
+                'password' => $update_data['password']
+            );
+            //Updating password - calling model function
+            if($this->User_model->update_password('user_id',$update_data['user_id'], $update_password))
+            {
+                echo json_encode(array('status' => "success"));
+                return;
+            }
+            echo json_encode(array('status' => "error", "error_message" => "Error in updating password"));
+            return;
+
         }
     }
 

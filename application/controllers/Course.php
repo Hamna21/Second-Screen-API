@@ -25,6 +25,7 @@ class Course extends CI_Controller
         $this->load->model('Course_model');
         $this->load->model('Teacher_model');
         $this->load->model('Category_model');
+        $this->load->model('Lecture_model');
 
         $this->load->helper(array('form', 'url', 'image'));
         $this->load->library('form_validation');
@@ -52,10 +53,10 @@ class Course extends CI_Controller
         if($this->input->server("REQUEST_METHOD") == "POST")
         {
             $data = json_decode(file_get_contents("php://input"));
-            $course_Name = $data->course_Name;
+            $course_name = $data->course_name;
 
             //Searching a course by Name
-            $course = $this->Course_model->get_course_name($course_Name);
+            $course = $this->Course_model->get_course_name($course_name);
             if(!$course)
             {
                 echo json_encode(array('status' => "error", "error_message" => "No course found with this name"));
@@ -63,10 +64,10 @@ class Course extends CI_Controller
             }
 
             //Displaying complete information of course
-            $teacher = $this->Teacher_model->get_teacher($course['teacher_ID']);
+            $teacher = $this->Teacher_model->get_teacher($course['teacher_id']);
             $myArray = array();
             $object = new stdClass();
-            $object->Course = array('course_ID' => $course['course_ID'],'course_Name' => $course['course_Name'], 'course_Description' => $course['course_Description'], 'course_Image' => $course['course_Image']   );
+            $object->Course = array('course_id' => $course['course_id'],'course_name' => $course['course_name'], 'course_description' => $course['course_description'], 'course_image' => $course['course_image']   );
             $object->Teacher = $teacher;
             $myArray[] = $object;
             echo json_encode(array('status' => "success", "course" => $myArray));
@@ -87,11 +88,11 @@ class Course extends CI_Controller
                 return;
             }
 
-            $teacher = $this->Teacher_model->get_teacher($course['teacher_ID']);
+            $teacher = $this->Teacher_model->get_teacher($course['teacher_id']);
 
             $myArray = array();
             $object = new stdClass();
-            $object->Course = array('course_ID' => $course['course_ID'],'course_Name' => $course['course_Name'], 'course_Description' => $course['course_Description'], 'course_Image' => $course['course_Image']   );
+            $object->Course = array('course_id' => $course['course_id'],'course_name' => $course['course_name'], 'course_description' => $course['course_description'], 'course_image' => $course['course_image']   );
             $object->Teacher = $teacher;
             $myArray[] = $object;
             echo json_encode(array('status' => "success", "course" => $myArray));
@@ -163,13 +164,13 @@ class Course extends CI_Controller
         if($this->input->server('REQUEST_METHOD') == "GET")
         {
             $data = array(
-                'user_ID' => $this->input->get('user_id'),
-                'course_ID' => $this->input->get('course_id')
+                'user_id' => $this->input->get('user_id'),
+                'course_id' => $this->input->get('course_id')
 
             );
 
             //Checking whether user is logged-in or not!
-            if(!($this->User_model->get_user_session($data['user_ID'])))
+            if(!($this->User_model->get_user_session($data['user_id'])))
             {
                 echo json_encode(array('status' => "error", "error_message" => "User not logged in - cannot enroll a course"));
                 return;
@@ -184,6 +185,35 @@ class Course extends CI_Controller
             echo json_encode(array('status' => "success"));
             return;
 
+        }
+    }
+
+
+    public function delete_user_course()
+    {
+        if($this->input->server('REQUEST_METHOD') == "GET")
+        {
+            $data = array(
+                'user_id' => $this->input->get('user_id'),
+                'course_id' => $this->input->get('course_id')
+            );
+
+
+            //Checking whether user is logged-in or not!
+            if(!($this->User_model->get_user_session($data['user_id'])))
+            {
+                echo json_encode(array('status' => "error", "error_message" => "User not logged in - cannot enroll a course"));
+                return;
+            }
+
+            //Enrolling a user in a course
+            if(!($this->Course_model->delete_user_course($data)))
+            {
+                echo json_encode(array('status' => "error", "error_message" => "Couldn't delete course!"));
+                return;
+            }
+            echo json_encode(array('status' => "success"));
+            return;
         }
     }
 
@@ -239,8 +269,8 @@ class Course extends CI_Controller
     {
         if($this->input->server('REQUEST_METHOD') == "GET")
         {
-            $courseID = $_REQUEST["course_id"];
-            $course = $this->Course_model->get_course_join($courseID);
+            $course_id = $_REQUEST["course_id"];
+            $course = $this->Course_model->get_course_join($course_id);
             if(!$course)
             {
                 echo json_encode(array('status' => "error"));
@@ -256,11 +286,11 @@ class Course extends CI_Controller
         if ($this->input->server('REQUEST_METHOD') == "POST") {
             $data = json_decode(file_get_contents("php://input"));
             $course_data = array(
-                'course_Name' => $data->course_Name,
-                'course_Description' => $data->course_Description,
-                'category_ID' => $data->category_ID,
-                'teacher_ID' => $data->teacher_ID,
-                'course_Image' => $data->course_Image
+                'course_name' => $data->course_Name,
+                'course_description' => $data->course_Description,
+                'category_id' => $data->category_ID,
+                'teacher_id' => $data->teacher_ID,
+                'course_image' => $data->course_Image
             );
 
 
@@ -280,14 +310,14 @@ class Course extends CI_Controller
                 return;
             }
 
-            $imageName = substr($course_data['course_Image'],strrpos($course_data['course_Image'],"/")+1);
-            $url = $course_data['course_Image'];
+            $imageName = substr($course_data['course_image'],strrpos($course_data['course_image'],"/")+1);
+            $url = $course_data['course_image'];
             $contents = file_get_contents($url);
             $save_path="./uploads/". $imageName;
 
             file_put_contents($save_path,$contents);
-            $course_data['course_Image'] =  $imageName;
-            $course_data['course_ThumbImage'] =  createThumbnail($imageName);
+            $course_data['course_image'] =  $imageName;
+            $course_data['course_thumbimage'] =  createThumbnail($imageName);
 
             if ($this->Course_model->insertCourse($course_data)) {
                 echo json_encode(array('status' => "success"));
@@ -305,11 +335,11 @@ class Course extends CI_Controller
     {
         if ($this->input->server('REQUEST_METHOD') == "POST") {
             $data = json_decode(file_get_contents("php://input"));
-            $courseID = $data->course_ID;
+            $course_id = $data->course_ID;
             $course_data = array(
-                'course_Description' => $data->course_Description,
-                'category_ID' => $data->category_ID,
-                'teacher_ID' => $data->teacher_ID
+                'course_description' => $data->course_Description,
+                'category_id' => $data->category_ID,
+                'teacher_id' => $data->teacher_ID
             );
 
 
@@ -344,11 +374,11 @@ class Course extends CI_Controller
                 $save_path="./uploads/". $imageName;
 
                 file_put_contents($save_path,$contents);
-                $course_data['course_Image'] =  $imageName;
-                $course_data['course_ThumbImage'] =  createThumbnail($imageName);
+                $course_data['course_image'] =  $imageName;
+                $course_data['course_thumbimage'] =  createThumbnail($imageName);
 
             }
-            if ($this->Course_model->updateCourse($courseID,$course_data)) {
+            if ($this->Course_model->updateCourse($course_id,$course_data)) {
                 echo json_encode(array('status' => "success"));
                 return;
             }
@@ -366,14 +396,14 @@ class Course extends CI_Controller
     public function deleteCourse()
     {
         if($this->input->server('REQUEST_METHOD') == "GET") {
-            $courseID = $_REQUEST["courseID"];
-            $course = $this->Course_model->get_course_join($courseID);
+            $course_id = $_REQUEST["course_id"];
+            $course = $this->Course_model->get_course_join($course_id);
 
             //Delete images from API server
 
             unlink("uploads/".$course['course_ThumbImage']);
             unlink("uploads/".$course['course_Image']);
-            if($this->Course_model->deleteCourse($courseID))
+            if($this->Course_model->deleteCourse($course_id))
             {
                 echo json_encode(array('status' => "success"));
                 return;

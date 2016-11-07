@@ -13,8 +13,25 @@ class user_model extends CI_Model
     public function get_user($email)
     {
         $query = $this->db
-            ->select('user_ID, first_Name, last_Name, user_Name, email, image_Path')
+            ->select('user_id, first_name, last_name, user_name, email, user_image')
             ->where('email',  $email )
+            ->get('user');
+
+        if ( $query->num_rows() > 0 ) {
+            $row = $query->row_array();
+            return $row;
+        }
+        else{
+            return null;
+        }
+    }
+
+
+    //Getting user via hash
+    public function get_user_hash($reset_hash)
+    {
+        $query = $this->db
+            ->where('reset_hash', $reset_hash)
             ->get('user');
 
         if ( $query->num_rows() > 0 ) {
@@ -30,8 +47,24 @@ class user_model extends CI_Model
     public function get_user_id($id)
     {
         $query = $this->db
-            ->select('user_ID,user_Name, first_Name, last_Name, email, image_Path')
-            ->where('user_ID',  $id)
+            ->select('user_id,user_name, first_name, last_name, email, user_image')
+            ->where('user_id',  $id)
+            ->get('user');
+
+        if ( $query->num_rows() > 0 ) {
+            $row = $query->row_array();
+            return $row;
+        }
+        else{
+            return null;
+        }
+    }
+
+    //Getting user via ID - for checking password
+    public function get_user_password($id)
+    {
+        $query = $this->db
+            ->where('user_id',  $id)
             ->get('user');
 
         if ( $query->num_rows() > 0 ) {
@@ -47,7 +80,7 @@ class user_model extends CI_Model
     public function get_login_user($data)
     {
         $query = $this->db
-            ->select('user_ID, first_Name, last_Name, user_Name, email, image_Path, isReset')
+            ->select('user_id, first_name, last_name, user_name, email, user_image, isReset')
             ->where('email',  $data['email'] )
             ->where('password', $data['password'])
             ->get('user');
@@ -109,10 +142,10 @@ class user_model extends CI_Model
         }
     }
 
-    public function insert_reset($userid,$data)
+    public function insert_reset($user_id,$data)
     {
         $this->db->trans_start();
-        $this->db->where('user_ID', $userid);
+        $this->db->where('user_id', $user_id);
         $this->db->update('user', $data);
         $this->db->trans_complete();
 
@@ -132,7 +165,7 @@ class user_model extends CI_Model
     {
         //Updating user by matching ID
         $this->db
-            ->where('id', $id)
+            ->where('user_id', $id)
             ->update('user', $data);
 
         if ($this->db->affected_rows()) {
@@ -147,11 +180,11 @@ class user_model extends CI_Model
 
 
     //Updating password by matching email
-    public function update_password($reset_hash, $data)
+    public function update_password($column,$value, $data)
     {
         //Updating password by matching hash
         $this->db->trans_start();
-        $this->db->where('reset_hash', $reset_hash);
+        $this->db->where($column, $value);
         $this->db->update('user', $data);
         $this->db->trans_complete();
 
@@ -181,7 +214,7 @@ class user_model extends CI_Model
     {
         //setting session to empty on logout!
         $this->db
-            ->where('user_ID', $user_id)
+            ->where('user_id', $user_id)
             ->delete('session');
 
         if ($this->db->affected_rows()) {
@@ -209,7 +242,7 @@ class user_model extends CI_Model
     public function get_user_session($user_id)
     {
         $query = $this->db
-            ->where('user_ID', $user_id)
+            ->where('user_id', $user_id)
             ->get('session');
 
         if ( $query->num_rows() > 0 ) {
@@ -227,19 +260,19 @@ class user_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'first_Name',
+                'field' => 'first_name',
                 'label' => 'First Name',
                 'rules' => 'required|regex_match[/^[A-Za-z]+$/]'
             ),
 
             array(
-                'field' => 'last_Name',
+                'field' => 'last_name',
                 'label' => 'Last Name',
                 'rules' => 'required|regex_match[/^[A-Za-z]+$/]'
             ),
 
             array(
-                'field' => 'user_Name',
+                'field' => 'user_name',
                 'label' => 'user Name',
                 'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]'
             ),
@@ -251,7 +284,7 @@ class user_model extends CI_Model
             array(
                 'field' => 'password',
                 'label' => 'Password',
-                'rules' => 'required',
+                'rules' => 'required|min_length[6]|max_length[20]',
             )
         );
 
@@ -282,26 +315,15 @@ class user_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'first_Name',
+                'field' => 'first_name',
                 'label' => 'First Name',
                 'rules' => 'required|regex_match[/^[A-Za-z]+$/]'
             ),
 
             array(
-                'field' => 'last_Name',
+                'field' => 'last_name',
                 'label' => 'Last Name',
                 'rules' => 'required|regex_match[/^[A-Za-z]+$/]'
-            ),
-
-            array(
-                'field' => 'user_Name',
-                'label' => 'user Name',
-                'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]'
-            ),
-            array(
-                'field' => 'password',
-                'label' => 'Password',
-                'rules' => 'required',
             )
         );
 

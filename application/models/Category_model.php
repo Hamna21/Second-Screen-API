@@ -13,7 +13,7 @@ class Category_model extends CI_Model
     public function get_categories()
     {
         $query = $this->db
-            ->order_by('category_ID', "DESC")
+            ->order_by('category_id', "DESC")
             ->get('category');
         return $query->result_array();
     }
@@ -22,7 +22,7 @@ class Category_model extends CI_Model
     public function get_category($category_id)
     {
         $query = $this->db
-            ->where('category_ID', $category_id)
+            ->where('category_id', $category_id)
             ->get('category');
 
         return $query->row_array();
@@ -32,8 +32,8 @@ class Category_model extends CI_Model
     public function get_courses_category($category_id)
     {
         $query = $this->db
-            ->select('course_ID, course_Name')
-            ->where('category_ID', $category_id)
+            ->select('course_id, course_name, course_description, course_image')
+            ->where('category_id', $category_id)
             ->get('course');
 
         return $query->result_array();
@@ -51,7 +51,7 @@ class Category_model extends CI_Model
     {
         $query = $this->db
             ->limit($limit, $start)
-            ->order_by('category_ID', "DESC")
+            ->order_by('category_id', "DESC")
             ->get('category');
 
         return $query->result_array();
@@ -73,7 +73,7 @@ class Category_model extends CI_Model
     //Update a category by its ID
     public function updateCategory($categoryID, $categoryData)
     {
-        $this->db->where("category_ID", $categoryID);
+        $this->db->where("category_id", $categoryID);
         $this->db->update("category", $categoryData);
         return true;
     }
@@ -82,7 +82,7 @@ class Category_model extends CI_Model
     //Delete a course by its ID
     public function deleteCategory($categoryID)
     {
-        $this->db->where('category_ID', $categoryID);
+        $this->db->where('category_id', $categoryID);
         $this->db->delete('category');
         return true;
     }
@@ -95,7 +95,7 @@ class Category_model extends CI_Model
     {
         $exist = "Category Name already in database - Try Again!";
         $query = $this->db
-            ->where('category_Name',$categoryName )
+            ->where('category_name',$categoryName )
             ->get('category');
 
         if($query->num_rows() > 0)
@@ -113,12 +113,12 @@ class Category_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'category_Name',
+                'field' => 'category_name',
                 'label' => 'Category Name',
                 'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]|is_unique[category.category_Name]'
             ),
             array(
-                'field' => 'category_Image',
+                'field' => 'category_image',
                 'label' => 'Category Image',
                 'rules' => 'required'
             )
@@ -132,7 +132,7 @@ class Category_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'category_Name',
+                'field' => 'category_name',
                 'label' => 'Category Name',
                 'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]'
             )

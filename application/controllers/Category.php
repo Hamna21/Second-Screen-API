@@ -93,8 +93,8 @@ class Category extends CI_Controller
     {
         if($this->input->server('REQUEST_METHOD') == "GET")
         {
-            $categoryID = $_REQUEST["categoryID"];
-            $category = $this->Category_model->get_category($categoryID);
+            $category_id = $_REQUEST["category_id"];
+            $category = $this->Category_model->get_category($category_id);
             if(!$category)
             {
                 echo json_encode(array('status' => "error", "error_message" => "No category found!"));
@@ -112,10 +112,9 @@ class Category extends CI_Controller
             $data = json_decode(file_get_contents("php://input"));
 
             $category_data = array(
-                'category_Name' => $data->category_Name,
-                'category_Image' => $data->category_Image
+                'category_name' => $data->category_Name,
+                'category_image' => $data->category_Image
             );
-
 
             $this->form_validation->set_data($category_data); //Setting Data
             $this->form_validation->set_rules($this->Category_model->getCategoryRegistrationRules()); //Setting Rules
@@ -131,14 +130,14 @@ class Category extends CI_Controller
                 return;
             }
 
-            $imageName = substr($category_data['category_Image'],strrpos($category_data['category_Image'],"/")+1);
-            $url = $category_data['category_Image'];
+            $imageName = substr($category_data['category_image'],strrpos($category_data['category_image'],"/")+1);
+            $url = $category_data['category_image'];
             $contents = file_get_contents($url);
             $save_path="./uploads/". $imageName;
 
             file_put_contents($save_path,$contents);
-            $category_data['category_Image'] =  $imageName;
-            $category_data['category_ThumbImage'] =  createThumbnail($imageName);
+            $category_data['category_image'] =  $imageName;
+            $category_data['category_thumbimage'] =  createThumbnail($imageName);
 
             if ($this->Category_model->insertCategory($category_data)) {
                 echo json_encode(array('status' => "success"));
@@ -157,9 +156,9 @@ class Category extends CI_Controller
         if ($this->input->server('REQUEST_METHOD') == "POST") {
             $data = json_decode(file_get_contents("php://input"));
 
-            $categoryID = $data->category_ID;
+            $category_id = $data->category_ID;
             $category_data = array(
-                'category_Name' => $data->category_Name
+                'category_name' => $data->category_Name
             );
 
             /* $this->form_validation->set_data($category_data); //Setting Data
@@ -194,11 +193,11 @@ class Category extends CI_Controller
                 $save_path="./uploads/". $imageName;
 
                 file_put_contents($save_path,$contents);
-                $category_data['category_Image'] =  $imageName;
-                $category_data['category_ThumbImage'] =  createThumbnail($imageName);
+                $category_data['category_image'] =  $imageName;
+                $category_data['category_thumbimage'] =  createThumbnail($imageName);
 
             }
-            if ($this->Category_model->updateCategory($categoryID,$category_data)) {
+            if ($this->Category_model->updateCategory($category_id,$category_data)) {
                 echo json_encode(array('status' => "success"));
                 return;
             }
@@ -213,13 +212,13 @@ class Category extends CI_Controller
     public function deleteCategory()
     {
         if($this->input->server('REQUEST_METHOD') == "GET") {
-            $categoryID = $_REQUEST["categoryID"];
-            $category = $this->Category_model->get_category($categoryID);
+            $category_id = $_REQUEST["category_id"];
+            $category = $this->Category_model->get_category($category_id);
 
             //Delete images from server
-            unlink("uploads/".$category['category_ThumbImage']);
-            unlink("uploads/".$category['category_Image']);
-            if($this->Category_model->deleteCategory($categoryID))
+            unlink("uploads/".$category['category_thumbimage']);
+            unlink("uploads/".$category['category_image']);
+            if($this->Category_model->deleteCategory($category_id))
             {
                 echo json_encode(array('status' => "success"));
                 return;
@@ -229,8 +228,6 @@ class Category extends CI_Controller
 
         }
     }
-
-
 
 
 }

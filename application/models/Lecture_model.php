@@ -14,7 +14,7 @@ class Lecture_model extends CI_Model
     {
         $query = $this->db
            // ->select('lecture_ID,lecture_Name, lecture_Description, lecture_start','lecture_end')
-            ->where('course_ID', $course_id)
+            ->where('course_id', $course_id)
             ->get('lecture');
 
         return $query->result_array();
@@ -32,8 +32,8 @@ class Lecture_model extends CI_Model
     {
         $this->db->limit($limit, $start);
         $this->db->from('lecture');
-        $this->db->join('course', 'lecture.course_ID= course.course_ID');
-        $this->db->order_by('lecture_ID', 'DESC');
+        $this->db->join('course', 'lecture.course_id = course.course_id');
+        $this->db->order_by('lecture_id', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -42,7 +42,7 @@ class Lecture_model extends CI_Model
     public function get_lecture($lecture_id)
     {
         $query = $this->db
-            ->where('lecture_ID', $lecture_id)
+            ->where('lecture_id', $lecture_id)
             ->get('lecture');
 
         return $query->row_array();
@@ -63,7 +63,7 @@ class Lecture_model extends CI_Model
     //Update a lecture by its ID
     public function updateLecture($lectureID, $lectureData)
     {
-        $this->db->where("lecture_ID", $lectureID);
+        $this->db->where("lecture_id", $lectureID);
         $this->db->update("lecture", $lectureData);
         return true;
     }
@@ -74,7 +74,7 @@ class Lecture_model extends CI_Model
     {
         //$lecture_Image = $this->db->select('lecture_Image');
         //$lecture_ThumbImage = $this->db->select('lecture_ThumbImage');
-        $this->db->where('lecture_ID', $lectureID);
+        $this->db->where('lecture_id', $lectureID);
         // unlink("uploads/".$lecture_Image);
         //unlink("uploads/".$lecture_ThumbImage);
         $this->db->delete('lecture');
@@ -88,7 +88,7 @@ class Lecture_model extends CI_Model
     {
         $exist = "Lecture Name already exists - Try Again!";
         $query = $this->db
-            ->where('lecture_Name',$q)
+            ->where('lecture_name',$q)
             ->get('lecture');
         if($query->num_rows() > 0)
         {
@@ -103,13 +103,13 @@ class Lecture_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'lecture_Name',
+                'field' => 'lecture_name',
                 'label' => 'Lecture Name',
                 'rules' => 'required|is_unique[lecture.lecture_Name]'
             ),
 
             array(
-                'field' => 'lecture_Description',
+                'field' => 'lecture_description',
                 'label' => 'Lecture Description',
                 'rules' => 'required'
             ),
@@ -124,7 +124,7 @@ class Lecture_model extends CI_Model
                 'rules' => 'required'
             ),
             array(
-                'field' => 'course_ID',
+                'field' => 'course_id',
                 'label' => 'Course',
                 'rules' => 'required'
             )
@@ -138,13 +138,13 @@ class Lecture_model extends CI_Model
     {
         $config = array(
             array(
-                'field' => 'lecture_Name',
+                'field' => 'lecture_name',
                 'label' => 'Lecture Name',
                 'rules' => 'required'
             ),
 
             array(
-                'field' => 'lecture_Description',
+                'field' => 'lecture_description',
                 'label' => 'Lecture Description',
                 'rules' => 'required'
             ),
@@ -159,7 +159,7 @@ class Lecture_model extends CI_Model
                 'rules' => 'required'
             ),
             array(
-                'field' => 'course_ID',
+                'field' => 'course_id',
                 'label' => 'Course',
                 'rules' => 'required'
             )
