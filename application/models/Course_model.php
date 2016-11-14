@@ -22,7 +22,7 @@ class Course_model extends CI_Model
     //Get all courses- along with teacher and category information
     public function get_courses()
     {
-        $this->db->select('course.course_id, course.course_name, course.course_description, course.course_thumbimage, teacher.teacher_name, category.category_name');
+        $this->db->select('course.course_id, course.course_name, course.course_description, course.course_image ,course.course_thumbimage, teacher.teacher_name, category.category_name');
         $this->db->from('course');
         $this->db->join('category', 'course.category_id= category.category_id');
         $this->db->join('teacher', 'course.teacher_id = teacher.teacher_id');
@@ -81,6 +81,7 @@ class Course_model extends CI_Model
         return $query->row_array();
     }
 
+
     //Getting total count of Courses
     public function getCourseTotal()
     {
@@ -92,7 +93,7 @@ class Course_model extends CI_Model
     public function get_user_courses($user_id)
     {
         $this->db
-            ->select('course.course_id, course.course_name, course.course_description, course.course_image, course.course_thumbimage')
+            ->select('course.course_id, course.course_name, course.course_description, course.course_image, course.course_thumbimage, course.category_id, course.teacher_id')
             ->from('course')
             ->join('user_course', 'course.course_id = user_course.course_id')
             ->where('user_ID', $user_id);

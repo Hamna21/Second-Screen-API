@@ -48,7 +48,7 @@ class Course extends CI_Controller
     }
 
     //Search a course by name
-    public function search_course()
+    public function search()
     {
         if($this->input->server("REQUEST_METHOD") == "POST")
         {
@@ -63,6 +63,13 @@ class Course extends CI_Controller
                 return;
             }
 
+            $myArray = array();
+            $myArray[] = $course;
+
+            echo json_encode(array('status' => "success", "course" => $myArray));
+            return;
+
+            /*
             //Displaying complete information of course
             $teacher = $this->Teacher_model->get_teacher($course['teacher_id']);
             $myArray = array();
@@ -71,6 +78,38 @@ class Course extends CI_Controller
             $object->Teacher = $teacher;
             $myArray[] = $object;
             echo json_encode(array('status' => "success", "course" => $myArray));
+            return;*/
+        }
+    }
+
+
+    public function search_course()
+    {
+        if($this->input->server("REQUEST_METHOD") == "POST") {
+            $data = json_decode(file_get_contents("php://input"));
+            $course_name = $data->course_name;
+            $myArray = array();
+
+
+            $courses = $this->Course_model->get_courses();
+            if(!$courses)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No course found!"));
+                return;
+            }
+            foreach ($courses as $course)
+            {
+                if (stripos($course['course_name'], $course_name) !== false) {
+                    $myArray[] = $course;
+                }
+            }
+
+            if(!(empty($myArray)))
+            {
+                echo json_encode(array('status' => "success", "courses" => $myArray));
+                return;
+            }
+            echo json_encode(array('status' => "success", "course" => "No courses found with this search parameter."));
             return;
         }
     }
@@ -89,14 +128,17 @@ class Course extends CI_Controller
             }
 
             $teacher = $this->Teacher_model->get_teacher($course['teacher_id']);
+            $course['teacher'] = $teacher;
+            echo json_encode(array('status' => "success", "course" => $course));
+            return;
 
-            $myArray = array();
+           /* $myArray = array();
             $object = new stdClass();
-            $object->Course = array('course_id' => $course['course_id'],'course_name' => $course['course_name'], 'course_description' => $course['course_description'], 'course_image' => $course['course_image']   );
+            $object->Course = array('course_id' => $course['course_id'],'course_name' => $course['course_name'], 'course_description' => $course['course_description'], 'course_image' => $course['course_image'] , 'course_thumbimage' => $course['course_thumbimage']   );
             $object->Teacher = $teacher;
             $myArray[] = $object;
             echo json_encode(array('status' => "success", "course" => $myArray));
-            return;
+            return;*/
 
         }
     }
@@ -271,6 +313,10 @@ class Course extends CI_Controller
         {
             $course_id = $_REQUEST["course_id"];
             $course = $this->Course_model->get_course_join($course_id);
+
+            log_message('error',var_dump($course));
+            return;
+
             if(!$course)
             {
                 echo json_encode(array('status' => "error"));

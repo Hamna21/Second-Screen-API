@@ -166,7 +166,7 @@ class User extends CI_Controller
                 //Setting SESSION_ID
                 $data_session = array(
                     'user_id' => $user['user_id'],
-                    'login_time' => date('Y-m-d H:i:s')
+                    'login_time' => date('Y-m-d h:i:sa')
                 );
 
                 //SESSION SET IN

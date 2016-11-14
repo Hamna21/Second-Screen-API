@@ -45,12 +45,9 @@ class Comment extends CI_Controller
             {
                 //Getting user of each comment
                 $user = $this->User_model->get_user_id($comment['user_id']);
-
-                //Storing each comment and user in Array as object!
-                $object = new stdClass();
-                $object->comment = $comment['comment_text'];
-                $object->user = array('user_id' => $user['user_id'], 'user_name' => $user['user_name'], 'user_image' => $user['user_image']  );
-                $myArray[] = $object;
+                $user = array('user_id' => $user['user_id'], 'user_name' => $user['user_name'], 'user_image' => $user['user_image']  );
+                $comment['user'] = $user;
+                $myArray[] = $comment;
 
             }
 

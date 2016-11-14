@@ -38,6 +38,18 @@ class Lecture_model extends CI_Model
         return $query->result_array();
     }
 
+
+    //Getting all lectures of a course
+    public function get_lectures($course_id)
+    {
+        $this->db->from('lecture');
+        $this->db->where('course_id', $course_id);
+        $this->db->order_by('lecture_id', 'DESC');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+
     //Get a single lecture by it's id
     public function get_lecture($lecture_id)
     {

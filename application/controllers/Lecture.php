@@ -23,6 +23,7 @@ class Lecture extends CI_Controller
         
         $this->load->model('Category_model');
         $this->load->model('Lecture_model');
+        $this->load->model('Quiz_model');
 
         $this->load->helper(array('form', 'url'));
         $this->load->library('form_validation');
@@ -54,18 +55,36 @@ class Lecture extends CI_Controller
         }
     }
 
+    //Getting all lectures of a course
+    public function lectures()
+    {
+        $course_id = $this->input->get('course_id');
+        $lectures = $this->Lecture_model->get_lectures($course_id);
+        if(!$lectures)
+        {
+            echo json_encode(array('status' => "error", "error_message" => "No lecture found!"));
+            return;
+        }
+
+        echo json_encode(array("status" => "success","lectures" => $lectures));
+        return;
+    }
+
     //Getting a single lecture by ID
     public function lecture()
     {
         if($this->input->server('REQUEST_METHOD') == "GET")
         {
-            $lectureID = $_REQUEST["lecture_id"];
-            $lecture = $this->Lecture_model->get_lecture($lectureID);
+            $lecture_id = $_REQUEST["lecture_id"];
+            $lecture = $this->Lecture_model->get_lecture($lecture_id);
             if(!$lecture)
             {
                 echo json_encode(array('status' => "error", "error_message" => "No lecture found!"));
                 return;
             }
+
+            $quizzes = $this->Quiz_model->get_quizzes($lecture_id);
+            $lecture['quizzes'] = $quizzes;
             echo json_encode(array('status' => "success", "lecture" => $lecture));
             return;
         }
