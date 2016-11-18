@@ -10,11 +10,24 @@ class Question_model extends CI_Model
 
     //-------SELECT------
 
-    //Getting all questions of a quiz
+    //Getting all questions of a particular quiz
     public function get_questions($quiz_id)
     {
         $query = $this->db
             ->where('quiz_id', $quiz_id)
+            ->order_by('question_id', 'DESC')
+            ->get('question');
+
+        return $query->result_array();
+    }
+
+    //Getting all questions of a particular quiz
+    public function get_questions_limit($quiz_id, $limit, $start)
+    {
+        $query = $this->db
+            ->limit($limit, $start)
+            ->where('quiz_id', $quiz_id)
+            ->order_by('question_id', 'DESC')
             ->get('question');
 
         return $query->result_array();
@@ -23,7 +36,8 @@ class Question_model extends CI_Model
     //Getting total count of all questions in a quiz
     public function getQuestionTotal($quiz_id)
     {
-        $this->db->from('course');
+        $this->db->from('question');
+        $this->db->where('quiz_id', $quiz_id);
         return $this->db->count_all_results();
     }
 
@@ -37,6 +51,27 @@ class Question_model extends CI_Model
             return true;
         }
     }
+
+    //--------UPDATE----------
+    //Update a question by its ID
+    public function updateQuestion($question_id, $question_data)
+    {
+        $this->db->where("question_id", $question_id);
+        $this->db->update("question", $question_data);
+        return true;
+    }
+
+
+    //---------DELETE------
+
+    //Deleting quiz
+    public function deleteQuestion($question_id)
+    {
+        $this->db->where('question_id', $question_id);
+        $this->db->delete('question');
+        return true;
+    }
+
 
     //---Validation Functions
     public function getQuestionRegistrationRules()

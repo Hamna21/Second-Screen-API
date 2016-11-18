@@ -38,4 +38,26 @@ class Comment_model extends CI_Model
             return true;
         }
     }
+
+
+    //-------------------LECTURE---------------------------//
+    //Showing comments of a lecture
+    public function get_comments_lecture($lecture_id)
+    {
+        $query = $this->db
+            ->select('user_id, comment_text, comment_time')
+            ->where('lecture_id', $lecture_id)
+            ->get('comment_lecture');
+
+        return $query->result_array();
+    }
+
+    //Adding comment of lecture
+    public function create_comment_lecture($comment_data)
+    {
+        if ($this->db->insert("comment_lecture", $comment_data)) {
+            return true;
+        }
+    }
+
 }

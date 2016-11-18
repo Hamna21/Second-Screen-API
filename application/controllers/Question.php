@@ -26,7 +26,7 @@ class Question extends CI_Controller
         $this->load->library('form_validation');
     }
 
-    //All questions of a quiz
+    //All questions of a particular quiz
     public function questions()
     {
         if($this->input->server('REQUEST_METHOD') == 'GET')
@@ -43,6 +43,30 @@ class Question extends CI_Controller
         }
     }
 
+    //All questions of a particular quiz - pagination purposes
+    public function questions_pagination()
+    {
+        if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+            $quiz_id = $this->input->get('quiz_id');
+            $data = json_decode(file_get_contents("php://input"));
+            $limit = $data->limit;
+            $start= $data->start;
+
+            $questions = $this->Question_model->get_questions_limit($quiz_id, $limit, $start);
+            if(!$questions)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No questions found"));
+                return;
+            }
+
+            $questionTotal = $this->Question_model->getQuestionTotal($quiz_id);
+            echo json_encode(array('status' => "success", "questions" => $questions, "questionTotal" => $questionTotal));
+            return;
+        }
+    }
+
+    //Adding question to database
     public function addQuestion()
     {
         if ($this->input->server('REQUEST_METHOD') == "POST") {
@@ -73,6 +97,56 @@ class Question extends CI_Controller
                 echo json_encode(array('status' => "error"));
                 return;
             }
+        }
+    }
+
+    //Editing Question
+    public function editQuestion()
+    {
+        if ($this->input->server('REQUEST_METHOD') == "POST") {
+            $data = json_decode(file_get_contents("php://input"));
+            $question_id = $data->question_id;
+            $question_data = array(
+                'question_text' => $data->question_text,
+                'option_one' => $data->option_one,
+                'option_two' => $data->option_two,
+                'option_three' => $data->option_three,
+                'option_four' => $data->option_four,
+                'correct_option' => $data->correct_option
+            );
+
+            $this->form_validation->set_data($question_data); //Setting Data
+            $this->form_validation->set_rules($this->Question_model->getQuestionRegistrationRules()); //Setting Rules
+
+            //Reloading page if validation fails
+            if ($this->form_validation->run() == FALSE) {
+                echo json_encode(array('status' => "error"));
+                return;
+            }
+
+            if ($this->Question_model->updateQuestion($question_id,$question_data)) {
+                echo json_encode(array('status' => "success"));
+                return;
+            } else {
+                echo json_encode(array('status' => "error"));
+                return;
+            }
+        }
+    }
+
+    //Deleting question
+    public function deleteQuestion()
+    {
+        if($this->input->server('REQUEST_METHOD') == "GET") {
+            $question_id = $_REQUEST["question_id"];
+
+            if($this->Question_model->deleteQuestion($question_id))
+            {
+                echo json_encode(array('status' => "success"));
+                return;
+            }
+            echo json_encode(array('status' => "error"));
+            return;
         }
     }
 }

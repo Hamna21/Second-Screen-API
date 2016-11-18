@@ -93,6 +93,9 @@ $route['api/category/courses'] = 'Category/courses_category'; //list of courses 
 $route['api/course/comments'] = 'Comment/comments_course'; //All comments of a course
 $route['api/course/create_comment'] = 'Comment/create_comment'; //Creating comment for a course
 
+$route['api/lecture/comments'] = 'Comment/comments_lecture'; //All comments of a course
+$route['api/lecture/create_comment'] = 'Comment/create_comment_lecture'; //Creating comment for a course
+
 //------Lectures-----------//
 $route['api/lecture'] = 'Lecture/lecture'; //Getting a single lecture by it's ID
 $route['api/lectures'] = 'Lecture/lectures'; //Getting all lectures of a course
@@ -149,13 +152,15 @@ $route['api/quiz/edit'] = 'Quiz/editQuiz'; //admin edit quiz
 $route['api/quiz/delete'] = 'Quiz/deleteQuiz'; //admin delete quiz
 
 $route['api/lecture/quiz'] = 'Quiz/quizzes'; //quizzes of a lecture
+$route['api/lecture/quiz_pagination'] = 'Quiz/quizzes_pagination'; //quizzes of a lecture
 
 
 //------------------Question-----------------//
-$route['api/question/add'] = 'Question/addQuestion'; //admin add quiz
-$route['api/question/edit'] = 'Question/addQuestion'; //admin edit quiz
-$route['api/question/delete'] = 'Question/deleteQuestion'; //admin delete quiz
+$route['api/question/add'] = 'Question/addQuestion'; //admin add question
+$route['api/question/edit'] = 'Question/editQuestion'; //admin edit question
+$route['api/question/delete'] = 'Question/deleteQuestion'; //admin delete question
 
-$route['api/quiz/questions'] = 'Question/questions'; //quizzes of a lecture
+$route['api/quiz/questions'] = 'Question/questions'; //questions of a lecture
+$route['api/quiz/questions_pagination'] = 'Question/questions_pagination'; //questions of a lecture
 
 

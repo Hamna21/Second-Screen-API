@@ -27,6 +27,7 @@ class Comment extends CI_Controller
         $this->load->library('form_validation');
     }
 
+    //---------COURSE-----------------
     public function comments_course()
     {
         if($this->input->server('REQUEST_METHOD') == "GET")
@@ -78,6 +79,69 @@ class Comment extends CI_Controller
             $comment_data['comment_time'] = date('Y-m-d H:i:s');
 
             if($this->Comment_model->create_comment($comment_data))
+            {
+                echo json_encode(array('status' => "success"));
+                return;
+            }
+            echo json_encode(array('status' => "error", "error_message" => "Couldn't insert comment"));
+            return;
+
+        }
+    }
+
+
+    //---------LECTURE-----------------
+    public function comments_lecture()
+    {
+        if($this->input->server('REQUEST_METHOD') == "GET")
+        {
+            //Getting comments of a course!
+            $lecture_id = $this->input->get('lecture_id');
+            $comments = $this->Comment_model->get_comments_lecture($lecture_id);
+            if(!$comments)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No comments found in this lecture!"));
+                return;
+            }
+
+            $myArray = array();
+            foreach($comments as $comment)
+            {
+                //Getting user of each comment
+                $user = $this->User_model->get_user_id($comment['user_id']);
+                $user = array('user_id' => $user['user_id'], 'user_name' => $user['user_name'], 'user_image' => $user['user_image']  );
+                $comment['user'] = $user;
+                $myArray[] = $comment;
+
+            }
+
+            echo json_encode(array('status' => "success", "comments" => $myArray));
+            return;
+        }
+    }
+
+    public function create_comment_lecture()
+    {
+        if($this->input->server('REQUEST_METHOD')=="POST")
+        {
+            $data = json_decode(file_get_contents("php://input"));
+            $comment_data = array(
+                'user_id' => $data->user_id,
+                'lecture_id' => $data->lecture_id,
+                'comment_text' => $data->comment
+            );
+
+            //Checking whether user is logged-in or not!
+            if(!($this->User_model->get_user_session($comment_data['user_id'])))
+            {
+                echo json_encode(array('status' => "error", "error_message" => "User not logged in"));
+                return;
+            }
+
+
+            $comment_data['comment_time'] = date('Y-m-d H:i:s');
+
+            if($this->Comment_model->create_comment_lecture($comment_data))
             {
                 echo json_encode(array('status' => "success"));
                 return;
