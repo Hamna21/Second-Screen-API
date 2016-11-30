@@ -36,8 +36,8 @@ if ( ! function_exists('createThumbnail'))
         $config['image_library'] = 'gd2';
         $config['create_thumb'] = TRUE;
         $config['maintain_ratio'] = FALSE;
-        $config['width']= 75;
-        $config['height']= 50;
+        $config['width']= 100;
+        $config['height']= 100;
         $config['source_image'] = './uploads/'.$fileName;
         $CI->load->library('image_lib', $config);
         $CI->image_lib->resize();

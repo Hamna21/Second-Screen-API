@@ -314,9 +314,6 @@ class Course extends CI_Controller
             $course_id = $_REQUEST["course_id"];
             $course = $this->Course_model->get_course_join($course_id);
 
-            log_message('error',var_dump($course));
-            return;
-
             if(!$course)
             {
                 echo json_encode(array('status' => "error"));
@@ -460,4 +457,5 @@ class Course extends CI_Controller
         }
 
     }
+
 }

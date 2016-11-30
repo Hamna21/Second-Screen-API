@@ -70,6 +70,7 @@ $route['api/signup'] = 'User/signup';  //Signup
 $route['api/user/profile']  = 'User/user_profile'; //Getting user profile
 $route['api/user/update']  = 'User/update_user';  //Updating user profile
 $route['api/user/update_password']  = 'User/update_password';  //Updating user password
+$route['api/user/update_token']  = 'User/updateToken';  //Updating user password
 
 
 //-----------------------Course-----------------------//
@@ -99,8 +100,19 @@ $route['api/lecture/create_comment'] = 'Comment/create_comment_lecture'; //Creat
 //------Lectures-----------//
 $route['api/lecture'] = 'Lecture/lecture'; //Getting a single lecture by it's ID
 $route['api/lectures'] = 'Lecture/lectures'; //Getting all lectures of a course
+$route['api/lectures_reference'] = 'Lecture/lectures_reference'; //Getting all lectures of a course
+$route['api/current_lecture'] = 'Lecture/currentLecture'; //Getting current lecture on TV
+
+//--------------Quiz---------//
+$route['api/quiz/response'] = 'Quiz/quiz_response'; //quiz response
 
 
+//------Questions-----------//
+$route['api/quiz/questions/notification'] = 'Quiz/quiz_questions'; //questions of a quiz
+
+
+//-----REFERENCE----------------//
+$route['api/reference/add'] = 'Lecture_Reference/addReference'; //Getting a single lecture by it's ID
 
 
 
@@ -160,7 +172,7 @@ $route['api/question/add'] = 'Question/addQuestion'; //admin add question
 $route['api/question/edit'] = 'Question/editQuestion'; //admin edit question
 $route['api/question/delete'] = 'Question/deleteQuestion'; //admin delete question
 
-$route['api/quiz/questions'] = 'Question/questions'; //questions of a lecture
-$route['api/quiz/questions_pagination'] = 'Question/questions_pagination'; //questions of a lecture
+$route['api/quiz/questions'] = 'Question/questions'; //questions of a quiz
+$route['api/quiz/questions_pagination'] = 'Question/questions_pagination'; //questions of a quiz for pagination
 
 

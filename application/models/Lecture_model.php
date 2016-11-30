@@ -38,7 +38,6 @@ class Lecture_model extends CI_Model
         return $query->result_array();
     }
 
-
     //Getting all lectures of a course
     public function get_lectures($course_id)
     {
@@ -49,6 +48,14 @@ class Lecture_model extends CI_Model
         return $query->result_array();
     }
 
+    //Getting all lectures from lecture table
+    public function get_lectures_reference()
+    {
+        $this->db->from('lecture');
+        $this->db->order_by('lecture_id', 'DESC');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
 
     //Get a single lecture by it's id
     public function get_lecture($lecture_id)
@@ -57,8 +64,25 @@ class Lecture_model extends CI_Model
             ->where('lecture_id', $lecture_id)
             ->get('lecture');
 
+
         return $query->row_array();
     }
+
+    //Getting current lecture on tv
+    public function get_current_lecture($current_date, $current_time, $user_id)
+    {
+        $query = $this->db
+            ->select('*')
+            ->from('lecture')
+            ->join('user_course', 'lecture.course_id = user_course.course_id')
+            ->where('user_course.user_id', $user_id)
+            ->where('lecture_date', $current_date)
+            ->where('lecture_start <=', $current_time)
+            ->where('lecture_end >=', $current_time);
+
+        return $query->get()->result();
+    }
+
 
 
     //---------INSERT-------
@@ -67,9 +91,12 @@ class Lecture_model extends CI_Model
     {
         if($this->db->insert('lecture', $lectureData))
         {
-            return true;
+            $insert_id = $this->db->insert_id();
+            return $insert_id;
         }
     }
+
+
 
     //---------UPDATE-------
     //Update a lecture by its ID
@@ -126,8 +153,8 @@ class Lecture_model extends CI_Model
                 'rules' => 'required'
             ),
             array(
-                'field' => 'lecture_start',
-                'label' => 'Lecture Starting Time',
+                'field' => 'lecture_date',
+                'label' => 'Lecture Date',
                 'rules' => 'required'
             ),
             array(

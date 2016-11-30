@@ -26,6 +26,10 @@ class Question extends CI_Controller
         $this->load->library('form_validation');
     }
 
+
+    //-----------DASHBOARD--------
+
+
     //All questions of a particular quiz
     public function questions()
     {

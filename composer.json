@@ -11,18 +11,14 @@
 		"source": "https://github.com/bcit-ci/CodeIgniter"
 	},
 	"require": {
-		"php": ">=5.2.4"
+		"php": ">=5.2.4",
+		"yzalis/crontab": "^1.0",
+		"rmccue/requests": ">=1.0"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
 	},
 	"require-dev": {
 		"mikey179/vfsStream": "1.1.*"
-	},
-    "require": {
-      "guzzlehttp/guzzle": "~6.0"
-    },
-    "require": {
-      "rmccue/requests": ">=1.0"
-    }
+	}
 }

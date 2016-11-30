@@ -26,7 +26,6 @@ class user_model extends CI_Model
         }
     }
 
-
     //Getting user via hash
     public function get_user_hash($reset_hash)
     {
@@ -115,7 +114,7 @@ class user_model extends CI_Model
         }
     }
 
-    //Getting user via email
+    //Checking if Hash is valid for password reset
     public function isValidHash($hash)
     {
         $query = $this->db
@@ -128,6 +127,31 @@ class user_model extends CI_Model
         else{
             return false;
         }
+    }
+
+    //Get Tokens of user registered in a course for lecture Notification
+    public function get_tokens($course_id)
+    {
+        $this->db
+            ->select('user.user_token')
+            ->from('user')
+            ->join('user_course', 'user.user_id = user_course.user_id')
+            ->where('course_id', $course_id);
+
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+    //Get course_id from lecture_id
+    public function get_courseID($lecture_id)
+    {
+        $this->db
+            ->select('course_id')
+            ->from('lecture')
+            ->where('lecture_id', $lecture_id);
+        $query = $this->db->get();
+
+        return $query->row_array();
     }
 
 
@@ -178,7 +202,6 @@ class user_model extends CI_Model
 
     }
 
-
     //Updating password by matching email
     public function update_password($column,$value, $data)
     {
@@ -205,6 +228,24 @@ class user_model extends CI_Model
             // generate an error... or use the log_message() function to log your error
         }*/
 
+    }
+
+    //Updating token of a user
+    public function update_token($user_id,$user_token)
+    {
+        //Updating token
+        $this->db->where('user_id', $user_id);
+        $this->db->update('user', array('user_token'=> $user_token));
+
+
+        if ($this->db->affected_rows())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 //---------------------Session Table----------------------
@@ -251,6 +292,15 @@ class user_model extends CI_Model
         else{
             return false;
         }
+    }
+
+    //Update login time
+    public function update_loginTime($user_id)
+    {
+        $this->db
+            ->where('user_id', $user_id)
+            ->update('session', array('login_time' => date('Y-m-d H:i:s')));
+
     }
 
     //---------------------Validation Rules----------------------
@@ -317,13 +367,13 @@ class user_model extends CI_Model
             array(
                 'field' => 'first_name',
                 'label' => 'First Name',
-                'rules' => 'required|regex_match[/^[A-Za-z]+$/]'
+                'rules' => 'regex_match[/^[A-Za-z]+$/]'
             ),
 
             array(
                 'field' => 'last_name',
                 'label' => 'Last Name',
-                'rules' => 'required|regex_match[/^[A-Za-z]+$/]'
+                'rules' => 'regex_match[/^[A-Za-z]+$/]'
             )
         );
 

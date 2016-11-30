@@ -21,6 +21,19 @@ class Question_model extends CI_Model
         return $query->result_array();
     }
 
+
+    //Getting all questions of a particular quiz - customized for notification
+    public function get_questions_quiz($quiz_id)
+    {
+        $query = $this->db
+            ->select('question_id,question_text, option_one,option_two,option_three,option_four')
+            ->where('quiz_id', $quiz_id)
+            ->order_by('question_id', 'DESC')
+            ->get('question');
+
+        return $query->result_array();
+    }
+
     //Getting all questions of a particular quiz
     public function get_questions_limit($quiz_id, $limit, $start)
     {
@@ -39,6 +52,17 @@ class Question_model extends CI_Model
         $this->db->from('question');
         $this->db->where('quiz_id', $quiz_id);
         return $this->db->count_all_results();
+    }
+
+    //Getting correct answer of a question
+    public function correct_response($question_id, $quiz_id)
+    {
+         $this->db
+            ->select('correct_option')
+            ->from('question')
+            ->where('question_id', $question_id)
+            ->where('quiz_id', $quiz_id);
+        return $this->db->get()->row('correct_option');
     }
 
     //---------INSERT-------

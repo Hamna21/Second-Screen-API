@@ -42,6 +42,7 @@ class User extends CI_Controller
                 'password' => $data->password
             );
 
+
             //Validating data
             $this->form_validation->set_data($user_data);
             $this->form_validation->set_rules($this->User_model->getLoginRules());
@@ -70,6 +71,8 @@ class User extends CI_Controller
             //If user already logged in - then return user
             if($this->User_model->get_user_session($user['user_id']))
             {
+                //Updating login time in session table
+                $this->User_model->update_loginTime($user['user_id']);
                 echo json_encode(array('status' => "success", "user" => $user));
                 return;
             }
@@ -84,6 +87,12 @@ class User extends CI_Controller
             //SESSION SET IN
             if($this->User_model->insert_session($data_session))
             {
+                //Setting user-token after successful login
+                if(array_key_exists('user_token', $data))
+                {
+                    $this->User_model->update_token($user['user_id'],$data->user_token);
+                }
+
                 echo json_encode(array('status' => "success", "user" => $user));
                 return;
             }
@@ -137,6 +146,12 @@ class User extends CI_Controller
             {
                 echo json_encode(array('status' => "error", "error_message" => validation_errors()));
                 return;
+            }
+
+            //Setting token if sent
+            if(isset($_POST['user_token']) )
+            {
+                $register_data['user_token'] = $this->input->post('user_token');
             }
 
             //Validating image and uploading it
@@ -235,8 +250,8 @@ class User extends CI_Controller
                     'protocol' => 'smtp',
                     'smtp_host' => 'ssl://smtp.googlemail.com',
                     'smtp_port' => 465,
-                    'smtp_user' => 'hamna.usmani@gmail.com', // change it to yours
-                    'smtp_pass' => 'hamnacute21', // change it to yours
+                    'smtp_user' => 'reset.elearn@gmail.com', // change it to yours
+                    'smtp_pass' => 'resetelearn', // change it to yours
                     'mailtype' => 'html',
                     'charset' => 'iso-8859-1',
                     'wordwrap' => TRUE
@@ -245,7 +260,7 @@ class User extends CI_Controller
                 //Sending email
                 $this->load->library('email', $config);
                 $this->email->set_newline("\r\n");
-                $this->email->from('hamna.usmani@gmail.com'); // change it to yours
+                $this->email->from('reset.elearn@gmail.com'); // change it to yours
                 $this->email->to('hamna.usmani@gmail.com');// change it to yours
                 $this->email->subject('Tester');
                 $this->email->message($link);
@@ -256,13 +271,11 @@ class User extends CI_Controller
                 }
                 else
                 {
-                    echo json_encode(array('status' => "error", "message" => "error in sending email"));
-                    return;
+                    show_error($this->email->print_debugger());
                 }
             }
 
-            echo json_encode(array('status' => "error", "message" => "error in sending email"));
-            return;
+            show_error($this->email->print_debugger());
         }
     }
 
@@ -348,12 +361,18 @@ class User extends CI_Controller
     {
         if($this->input->server("REQUEST_METHOD") == "POST")
         {
-            $update_data = array(
-                'first_name' => $this->input->post('first_name'),
-                'last_name' => $this->input->post('last_name')
-            );
-
             $user_id = $this->input->post('user_id');
+            $update_data = array();
+
+            if( isset($_POST['first_name']) )
+            {
+                $update_data['first_name'] =  $this->input->post('first_name');
+            }
+            if( isset($_POST['last_name']) )
+            {
+                $update_data['last_name'] =  $this->input->post('last_name');
+            }
+
 
             //Checking whether user is logged-in or not!
             if(!($this->User_model->get_user_session($user_id)))
@@ -446,6 +465,28 @@ class User extends CI_Controller
         }
     }
 
+    //Updating (android) tokens of user
+    public function updateToken()
+    {
+        if($this->input->server('REQUEST_METHOD') == "POST")
+        {
+            $data = json_decode(file_get_contents("php://input"));
+            $user_id = $data->user_id;
+            $user_token = $data->user_token;
+
+            if($this->User_model->update_token($user_id,$user_token))
+            {
+                echo json_encode(array('status' => "success", "message" => "Token Updated."));
+                return;
+            }
+
+            echo json_encode(array('status' => "error", "error_message" => "Couldn't update token"));
+            return;
+
+        }
+    }
+
+
     //---------ADMIN---------------//
     public function loginAdmin()
     {
@@ -516,4 +557,6 @@ class User extends CI_Controller
 
         }
     }
+
+
 }

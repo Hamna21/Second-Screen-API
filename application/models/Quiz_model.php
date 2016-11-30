@@ -21,6 +21,18 @@ class Quiz_model extends CI_Model
         return $query->result_array();
     }
 
+
+    //Getting a single quiz by its id
+    public function get_quiz($quiz_id)
+    {
+        $query = $this->db
+            ->select('quiz_title, quiz_time, quiz_duration')
+            ->where('quiz_id', $quiz_id)
+            ->get('quiz');
+
+        return $query->row_array();
+    }
+
     //Getting all quizzes of a particular lecture - for pagination
     public function get_quizzes_limit($lecture_id, $limit, $start)
     {
@@ -47,7 +59,8 @@ class Quiz_model extends CI_Model
     {
         if($this->db->insert('quiz', $quiz_data))
         {
-            return true;
+            $insert_id = $this->db->insert_id();
+            return $insert_id;
         }
     }
 
