@@ -81,7 +81,6 @@ class Course_model extends CI_Model
         return $query->row_array();
     }
 
-
     //Getting total count of Courses
     public function getCourseTotal()
     {
@@ -97,6 +96,19 @@ class Course_model extends CI_Model
             ->from('course')
             ->join('user_course', 'course.course_id = user_course.course_id')
             ->where('user_ID', $user_id);
+
+        $query = $this->db->get();
+        return $query->result_array();
+
+    }
+
+    //Get all users registered in a course
+    public function get_course_users($course_id)
+    {
+        $this->db
+            ->select('user_id')
+            ->from('user_course')
+            ->where('course_id', $course_id);
 
         $query = $this->db->get();
         return $query->result_array();

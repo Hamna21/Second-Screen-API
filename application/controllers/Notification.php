@@ -7,6 +7,7 @@ class Notification extends CI_Controller
         parent::__construct();
         header('Content-Type: application/json');
 	    $this->load->model('User_model');
+	    $this->load->model('Lecture_model');
     }
 
 
@@ -57,8 +58,8 @@ class Notification extends CI_Controller
 
         //Getting users registered in lecture - course
         $lecture_id = $this->input->get('lecture_id');
-        $result = $this->User_model->get_courseID($lecture_id);
-        $users =  $this->User_model->get_tokens($result['course_id']);
+        $course_id = $this->Lecture_model->get_course_id($lecture_id);
+        $users =  $this->User_model->get_tokens($course_id);
 
          foreach ($users as $user)
          {
@@ -128,7 +129,7 @@ class Notification extends CI_Controller
     {
         $quiz_id = $this->input->get('quiz_id');
         $quiz_title = $this->input->get('quiz_title');
-	$token = $this->input->get('token');
+	    $token = $this->input->get('token');
 
         $url = 'https://fcm.googleapis.com/fcm/send';
         $headers = array('Content-Type' => 'application/json', 'authorization' => 'key=AIzaSyDVBrdFCenf2iJli4b-jYYxcsReBctV7YI');
@@ -156,7 +157,7 @@ class Notification extends CI_Controller
         $lecture_time = $this->input->get('lecture_time');
         $course_id= $this->input->get('course_id');
         $lecture_id= $this->input->get('lecture_id');
-	$token = $this->input->get('token');
+	    $token = $this->input->get('token');
 
             $url = 'https://fcm.googleapis.com/fcm/send';
             $headers = array('Content-Type' => 'application/json', 'authorization' => 'key=AIzaSyDVBrdFCenf2iJli4b-jYYxcsReBctV7YI');
@@ -177,7 +178,4 @@ class Notification extends CI_Controller
             var_dump($response);
 
     }
-
-	
-   
 }

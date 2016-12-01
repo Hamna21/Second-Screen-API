@@ -142,18 +142,6 @@ class user_model extends CI_Model
         return $query->result_array();
     }
 
-    //Get course_id from lecture_id
-    public function get_courseID($lecture_id)
-    {
-        $this->db
-            ->select('course_id')
-            ->from('lecture')
-            ->where('lecture_id', $lecture_id);
-        $query = $this->db->get();
-
-        return $query->row_array();
-    }
-
 
 //---------------------INSERT---------------------------
 

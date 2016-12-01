@@ -84,6 +84,16 @@ class Lecture_model extends CI_Model
     }
 
 
+    //Getting course ID via Lecture ID
+    public function get_course_id($lecture_id)
+    {
+        $this->db
+            ->select('course_id')
+            ->from('lecture')
+            ->where('lecture_id', $lecture_id);
+        return $this->db->get()->row('course_id');
+    }
+
 
     //---------INSERT-------
     //Inserting new Lecture

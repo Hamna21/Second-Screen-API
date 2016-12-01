@@ -26,6 +26,7 @@ class Course extends CI_Controller
         $this->load->model('Teacher_model');
         $this->load->model('Category_model');
         $this->load->model('Lecture_model');
+        $this->load->model('Quiz_model');
 
         $this->load->helper(array('form', 'url', 'image'));
         $this->load->library('form_validation');
@@ -211,6 +212,7 @@ class Course extends CI_Controller
 
             );
 
+
             //Checking whether user is logged-in or not!
             if(!($this->User_model->get_user_session($data['user_id'])))
             {
@@ -218,12 +220,36 @@ class Course extends CI_Controller
                 return;
             }
 
+
             //Enrolling a user in a course
             if(!($this->Course_model->insert_user_course($data)))
             {
                 echo json_encode(array('status' => "error", "error_message" => "Couldn't add course!"));
                 return;
             }
+
+            //Adding user to quiz_result for all quizzes of that course
+
+            //Getting all lectures of a course
+            $lectures = $this->Lecture_model->get_lectures($data['course_id']);
+            foreach ($lectures as $lecture)
+            {
+                //Getting all quizzes of a lecture
+                $quizzes = $this->Quiz_model->get_quizzes($lecture['lecture_id']);
+
+                //Storing each quiz of user in quiz_result
+                foreach ($quizzes as $quiz)
+                {
+                    $quiz_data = array(
+                        "quiz_id" => $quiz['quiz_id'],
+                        "user_id" => $data['user_id'],
+                        "status" => "false"
+                    );
+
+                    $this->Quiz_model->insert_quizResult($quiz_data);
+                }
+            }
+
             echo json_encode(array('status' => "success"));
             return;
 

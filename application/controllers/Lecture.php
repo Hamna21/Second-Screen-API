@@ -99,12 +99,6 @@ class Lecture extends CI_Controller
                 return;
             }
 
-            //All quizzes of a lecture
-            $quizzes = $this->Quiz_model->get_quizzes($lecture_id);
-            if($quizzes)
-            {
-                $lecture['quizzes'] = $quizzes;
-            }
 
             //All references of a lecture
             $references = $this->Reference_model->get_references_lecture($lecture_id);
@@ -115,12 +109,18 @@ class Lecture extends CI_Controller
                     if($reference['type'] == "lecture")
                     {
                         $lecture = $this->Lecture_model->get_lecture($reference['value']);
-                        //$reference['lecture_name'] = $lecture['lecture_name'];
 
                         $references[$key]['lecture_name']= $lecture['lecture_name'];
                     }
                 }
                 $lecture['references'] = $references;
+            }
+
+            //All quizzes of a lecture
+            $quizzes = $this->Quiz_model->get_quizzes($lecture_id);
+            if($quizzes)
+            {
+                $lecture['quizzes'] = $quizzes;
             }
 
 

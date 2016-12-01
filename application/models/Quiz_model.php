@@ -21,7 +21,6 @@ class Quiz_model extends CI_Model
         return $query->result_array();
     }
 
-
     //Getting a single quiz by its id
     public function get_quiz($quiz_id)
     {
@@ -52,6 +51,18 @@ class Quiz_model extends CI_Model
         return $this->db->count_all_results();
     }
 
+    //Getting quiz result - also checking whethere quiz has been attempted or not
+    public function get_quiz_result($quiz_id, $user_id)
+    {
+        $query = $this->db
+            ->where('quiz_id', $quiz_id)
+            ->where('user_id', $user_id)
+            ->get('quiz_result');
+
+        return $query->row_array();
+
+    }
+
     //---------INSERT-------
 
     //Inserting new Quiz
@@ -64,6 +75,12 @@ class Quiz_model extends CI_Model
         }
     }
 
+    //Inserting quiz status for all users in quiz_result
+    public function insert_quizResult($quiz_data)
+    {
+        $this->db->insert('quiz_result', $quiz_data);
+    }
+
 
     //--------UPDATE----------
     //Update a quiz by its ID
@@ -71,6 +88,15 @@ class Quiz_model extends CI_Model
     {
         $this->db->where("quiz_id", $quiz_id);
         $this->db->update("quiz", $quiz_data);
+        return true;
+    }
+
+    //Updating status, total and result of quiz
+    public function updateQuizResult($quiz_id, $user_id, $quiz_data)
+    {
+        $this->db->where("quiz_id", $quiz_id);
+        $this->db->where("user_id", $user_id);
+        $this->db->update("quiz_result", $quiz_data);
         return true;
     }
 
