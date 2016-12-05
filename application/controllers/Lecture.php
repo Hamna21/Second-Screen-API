@@ -99,6 +99,13 @@ class Lecture extends CI_Controller
                 return;
             }
 
+            //All quizzes of a lecture
+            $quizzes = $this->Quiz_model->get_quizzes($lecture_id);
+            if($quizzes)
+            {
+                $lecture['quizzes'] = $quizzes;
+            }
+
 
             //All references of a lecture
             $references = $this->Reference_model->get_references_lecture($lecture_id);
@@ -108,21 +115,13 @@ class Lecture extends CI_Controller
                 {
                     if($reference['type'] == "lecture")
                     {
-                        $lecture = $this->Lecture_model->get_lecture($reference['value']);
+                        $lecture_from_reference = $this->Lecture_model->get_lecture($reference['value']);
 
-                        $references[$key]['lecture_name']= $lecture['lecture_name'];
+                        $references[$key]['lecture_name']= $lecture_from_reference['lecture_name'];
                     }
                 }
                 $lecture['references'] = $references;
             }
-
-            //All quizzes of a lecture
-            $quizzes = $this->Quiz_model->get_quizzes($lecture_id);
-            if($quizzes)
-            {
-                $lecture['quizzes'] = $quizzes;
-            }
-
 
             echo json_encode(array('status' => "success", "lecture" => $lecture));
             return;
@@ -257,7 +256,7 @@ class Lecture extends CI_Controller
             if ($lecture_id)
             {
                 //cronjob 10 minutes prior
-                lectureNotification($minute, $hour, $day, $month,$lecture_data['course_id'], $lecture_data['lecture_name'],$lecture_data['lecture_start']);
+                lectureNotification($minute, $hour, $day, $month,$lecture_data['course_id'], $lecture_data['lecture_name'],$lecture_data['lecture_start'],$lecture_id);
                 //cronjob on exact lecture time
                 currentLectureNotification($current_minute, $current_hour, $current_day, $current_month,$lecture_data['course_id'], $lecture_data['lecture_name'],$lecture_data['lecture_start'], $lecture_id);
                 echo json_encode(array('status' => "success"));

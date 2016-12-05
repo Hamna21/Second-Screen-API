@@ -8,18 +8,54 @@ class Notification extends CI_Controller
         header('Content-Type: application/json');
 	    $this->load->model('User_model');
 	    $this->load->model('Lecture_model');
+	    $this->load->model('Quiz_model');
+	    $this->load->model('Notification_model');
     }
 
 
     //------------------NOTIFICATIONS-----------------
 
+    //Getting all notifications of a user
+    public function notifications()
+    {
+        if($this->input->server('REQUEST_METHOD') == "GET")
+        {
+            $user_id = $this->input->get('user_id');
+
+            //Getting all notifications of a user
+            $notifications = $this->Notification_model->get_notifications($user_id);
+            if(!$notifications)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No notifications found for this user!"));
+                return;
+            }
+
+            //If notification is of a quiz, then getting it's status
+            foreach ($notifications as $key => $notification)
+            {
+                if($notification['type'] == "quiz")
+                {
+                    $quiz_id = $notification['id'];
+                    $quiz_result = $this->Quiz_model->get_quiz_result_duration($quiz_id, $user_id);
+                    $notifications[$key]['flag']= $quiz_result['status'];
+                    $notifications[$key]['quiz_duration']= $quiz_result['quiz_duration'];
+                }
+            }
+
+            echo json_encode(array('status' => "success", "notifications" => $notifications));
+            return;
+        }
+    }
+
     //Lecture Notification - 10 minutes prior
     public function sendLectureRequest()
     {
+        $lecture_id = $this->input->get('lecture_id');
         $lecture_name = $this->input->get('lecture_name');
         $lecture_time = $this->input->get('lecture_time');
         $course_id= $this->input->get('course_id');
 
+        //Converting 24 hour time to am/pm format
         $date = new DateTime($lecture_time);
         $lecture_time = $date->format('h:i:s a');
 
@@ -30,27 +66,68 @@ class Notification extends CI_Controller
             return;
         }
 
+        //Sending notification to each user
         foreach ($users as $user)
         {
-            $url = 'https://fcm.googleapis.com/fcm/send';
-            $headers = array('Content-Type' => 'application/json', 'authorization' => 'key=AIzaSyDVBrdFCenf2iJli4b-jYYxcsReBctV7YI');
+            //Checking whether user is logged-in or not
+            //If user is not logged-in, then store notification in table and don't send
 
-            $fields = array (
-                'notification' => array (
-                    "title"=> "Lecture Notification",
-                    "body" => $lecture_name . " will start at ". $lecture_time,
-                    "icon" => "myicon"
-                ),
-	
-                'to' => $user['user_token']
-            );
+            //User not logged in
+            if(!($this->User_model->get_user_session($user['user_id'])))
+            {
+                $notification_data = array(
+                    "user_id" => $user['user_id'],
+                    "notification_time" => date('Y:m:d H:i:s'),
+                    "type" => "lecture",
+                    "id" => $lecture_id,
+                    "title" => $lecture_name,
+                    "flag" => "10 minutes"
+                );
 
-            $response = (Requests::post($url, $headers, json_encode($fields)));
+                $this->Notification_model->insertNotification($notification_data);
+            }
+
+            //User logged in
+            else
+            {
+                $url = 'https://fcm.googleapis.com/fcm/send';
+                $headers = array('Content-Type' => 'application/json', 'authorization' => 'key=AIzaSyDVBrdFCenf2iJli4b-jYYxcsReBctV7YI');
+
+                $fields = array (
+                    'notification' => array (
+                        "title"=> "Lecture Notification",
+                        "body" => $lecture_name . " will start at ". $lecture_time,
+                        "icon" => "myicon"
+                    ),
+
+                    'to' => $user['user_token']
+                );
+
+                //Checking if user is logged in -only then send notification
+                $response = (Requests::post($url, $headers, json_encode($fields)));
+                $result = json_decode($response->body);
+                $status = $result->success;
+                //If Notification sent successfully, then storing it in DB
+                if($status == 1)
+                {
+                    $notification_data = array(
+                        "user_id" => $user['user_id'],
+                        "notification_time" => date('Y:m:d H:i:s'),
+                        "type" => "lecture",
+                        "id" => $lecture_id,
+                        "title" => $lecture_name,
+                        "flag" => "10 minutes"
+                    );
+
+                    $this->Notification_model->insertNotification($notification_data);
+                }
+
+            }
 
         }
-     }
+    }
 
-    //Quiz Notification
+    //Quiz Notification - on starting time of quiz
     public function sendQuizRequest()
     {
         $quiz_id = $this->input->get('quiz_id');
@@ -61,25 +138,65 @@ class Notification extends CI_Controller
         $course_id = $this->Lecture_model->get_course_id($lecture_id);
         $users =  $this->User_model->get_tokens($course_id);
 
+        //Sending notification to each user
          foreach ($users as $user)
          {
-            $url = 'https://fcm.googleapis.com/fcm/send';
-             $headers = array('Content-Type' => 'application/json', 'authorization' => 'key=AIzaSyDVBrdFCenf2iJli4b-jYYxcsReBctV7YI');
+             //Checking whether user is logged-in or not
+             //If user is not logged-in, then store notification in table and don't send
 
-             $fields = array (
-                'notification' => array (
-                    "title"=> "Quiz Notification",
-                    "body" => $quiz_title . "is starting now.",
-                    "icon" => "myicon"
-                ),
-                'data' => array(
-                    "quiz_id"=>  $quiz_id
-                ),
+             //User not logged in
+             if(!($this->User_model->get_user_session($user['user_id'])))
+             {
+                 $notification_data = array(
+                     "user_id" => $user['user_id'],
+                     "notification_time" => date('Y:m:d H:i:s'),
+                     "type" => "quiz",
+                     "id" => $quiz_id,
+                     "title" => $quiz_title
+                 );
 
-                 'to' =>  $user['user_token']
+                 $this->Notification_model->insertNotification($notification_data);
 
-                );
-                $response = (Requests::post($url, $headers, json_encode($fields)));
+             }
+             else
+             {
+                 //User logged in
+                 $url = 'https://fcm.googleapis.com/fcm/send';
+                 $headers = array('Content-Type' => 'application/json', 'authorization' => 'key=AIzaSyDVBrdFCenf2iJli4b-jYYxcsReBctV7YI');
+
+                 $fields = array (
+                     'notification' => array (
+                         "title"=> "Quiz Notification",
+                         "body" => $quiz_title . " is about to start.",
+                         "icon" => "myicon"
+                     ),
+                     'data' => array(
+                         "quiz_id"=>  $quiz_id
+                     ),
+
+                     'to' =>  $user['user_token']
+
+                 );
+
+                 $response = (Requests::post($url, $headers, json_encode($fields)));
+                 $result = json_decode($response->body);
+                 $status = $result->success;
+                 //If Notification sent successfully, then storing it in DB
+                 if($status == 1)
+                 {
+                     $notification_data = array(
+                         "user_id" => $user['user_id'],
+                         "notification_time" => date('Y:m:d H:i:s'),
+                         "type" => "quiz",
+                         "id" => $quiz_id,
+                         "title" => $quiz_title
+                     );
+
+                     $this->Notification_model->insertNotification($notification_data);
+                 }
+
+             }
+
          }
     }
 
@@ -91,6 +208,7 @@ class Notification extends CI_Controller
         $course_id= $this->input->get('course_id');
         $lecture_id= $this->input->get('lecture_id');
 
+        //Getting tokens of all registered user
         $users= $this->User_model->get_tokens($course_id);
         if(!$users)
         {
@@ -100,25 +218,61 @@ class Notification extends CI_Controller
 
         foreach ($users as $user)
         {
-            $url = 'https://fcm.googleapis.com/fcm/send';
-            $headers = array('Content-Type' => 'application/json', 'authorization' => 'key=AIzaSyDVBrdFCenf2iJli4b-jYYxcsReBctV7YI');
+            //Checking whether user is logged-in or not
+            //If user is not logged-in, then store notification in table and don't send
 
-            $fields = array (
-                'notification' => array (
-                    "title"=> "Lecture Notification",
-                    "body" => $lecture_name . " is starting now.",
-                    "icon" => "myicon"
-                ),
-                'data' => array(
-                    "lecture_id"=>  $lecture_id
-                ),
-                'to' => $user['user_token']
-            );
+            //User not logged in
+            if(!($this->User_model->get_user_session($user['user_id'])))
+            {
+                $notification_data = array(
+                    "user_id" => $user['user_id'],
+                    "notification_time" => date('Y:m:d H:i:s'),
+                    "type" => "lecture",
+                    "id" => $lecture_id,
+                    "title" => $lecture_name,
+                    "flag" => "now"
+                );
 
-            $response = (Requests::post($url, $headers, json_encode($fields)));
+                $this->Notification_model->insertNotification($notification_data);
+            }
+            //User logged in
+            else
+            {
+                $url = 'https://fcm.googleapis.com/fcm/send';
+                $headers = array('Content-Type' => 'application/json', 'authorization' => 'key=AIzaSyDVBrdFCenf2iJli4b-jYYxcsReBctV7YI');
+
+                $fields = array (
+                    'notification' => array (
+                        "title"=> "Lecture Notification",
+                        "body" => $lecture_name . " is about to start.",
+                        "icon" => "myicon"
+                    ),
+                    'data' => array(
+                        "lecture_id"=>  $lecture_id
+                    ),
+                    'to' => $user['user_token']
+                );
+
+                $response = (Requests::post($url, $headers, json_encode($fields)));
+                $result = json_decode($response->body);
+                $status = $result->success;
+                //If Notification sent successfully, then storing it in DB
+                if($status == 1)
+                {
+                    $notification_data = array(
+                        "user_id" => $user['user_id'],
+                        "notification_time" => date('Y:m:d H:i:s'),
+                        "type" => "lecture",
+                        "id" => $lecture_id,
+                        "title" => $lecture_name,
+                        "flag" => "now"
+                    );
+
+                    $this->Notification_model->insertNotification($notification_data);
+                }
+            }
 
         }
-
     }
 
 

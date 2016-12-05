@@ -115,6 +115,11 @@ $route['api/quiz/questions/notification'] = 'Quiz/quiz_questions'; //questions o
 $route['api/reference/add'] = 'Lecture_Reference/addReference'; //Getting a single lecture by it's ID
 
 
+//-----NOTIFICATION------------//
+$route['api/notifications'] = 'Notification/notifications'; //notifications of a user
+
+
+
 
 //----------------------------------------------DASHBOARD----------------------------------------------------------//
 

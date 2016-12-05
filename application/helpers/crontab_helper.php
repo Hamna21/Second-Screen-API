@@ -7,12 +7,14 @@ use Crontab\Job;
 if ( ! function_exists('lectureNotification'))
 {
     //Helper function for setting cronjob at specified time
-    function lectureNotification($minute, $hour, $day, $month, $course_id, $lecture_name, $lecture_time)
+    function lectureNotification($minute, $hour, $day, $month, $course_id, $lecture_name, $lecture_time, $lecture_id)
     {
         //Setting url - path to controller/function which is to be executed
         $command = '/usr/bin/wget ';
         $url = '"http://107.180.106.216/second_screen_api/Notification/sendLectureRequest?lecture_name='
             .$lecture_name
+            .'&lecture_id='
+            .$lecture_id
             .'&lecture_time='
             .$lecture_time
             .'&course_id='

@@ -1,5 +1,5 @@
 <?php
-class user_model extends CI_Model
+class User_model extends CI_Model
 {
     public function __construct()
     {
@@ -133,7 +133,7 @@ class user_model extends CI_Model
     public function get_tokens($course_id)
     {
         $this->db
-            ->select('user.user_token')
+            ->select('user.user_id,user.user_token')
             ->from('user')
             ->join('user_course', 'user.user_id = user_course.user_id')
             ->where('course_id', $course_id);

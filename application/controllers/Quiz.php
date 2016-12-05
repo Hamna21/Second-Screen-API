@@ -84,20 +84,28 @@ class Quiz extends CI_Controller
             //Checking whether quiz attempted or not
             //If attempted then returning result
             $quiz_result = $this->Quiz_model->get_quiz_result($quiz_id, $user_id);
-
             //Getting quiz information alongside quiz_result to include quiz title and duration in result
-            $quiz = $this->Quiz_model->get_quiz($quiz_id);
-            $quiz_result['quiz_title'] = $quiz['quiz_title'];
-            $quiz_result['quiz_duration'] = $quiz['quiz_duration'];
 
+            $quiz = $this->Quiz_model->get_quiz($quiz_id);
+            //If quiz_result entry not found, means user is not listed for the quiz
+            //only return quiz - not questions
+            if(!$quiz_result)
+            {
+                echo json_encode(array('status' => "success", "message" => "User not listed in course",  "quiz" => $quiz));
+                return;
+            }
+
+            //If quiz attempted by user, then return result of quiz
             if($quiz_result['status'] == "true")
             {
+                $quiz_result['quiz_title'] = $quiz['quiz_title'];
+                $quiz_result['quiz_duration'] = $quiz['quiz_duration'];
                 echo json_encode(array('status' => "success", "quiz" => $quiz_result));
                 return;
             }
 
 
-
+            //If quiz not attempted by user, then return all questions
             $questions = $this->Question_model->get_questions_quiz($quiz_id);
             if(!$questions)
             {
@@ -157,6 +165,8 @@ class Quiz extends CI_Controller
             return;
         }
     }
+
+
 
 
 
