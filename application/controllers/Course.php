@@ -369,10 +369,10 @@ class Course extends CI_Controller
             //Reloading add course page with same fields if validation fails
             if ($this->form_validation->run() == FALSE) {
                 $error_data = array(
-                    'courseName_Error' => form_error('course_Name'),
-                    'courseDescription_Error' => form_error('course_Description'),
-                    'categoryID_Error' => form_error('category_ID'),
-                    'teacherID_Error' => form_error('teacher_ID')
+                    'courseName_Error' => form_error('course_name'),
+                    'courseDescription_Error' => form_error('course_description'),
+                    'categoryID_Error' => form_error('category_id'),
+                    'teacherID_Error' => form_error('teacher_id')
                 );
 
                 echo json_encode(array('status' => "error in validation", 'error_messages' => $error_data));
@@ -406,6 +406,7 @@ class Course extends CI_Controller
             $data = json_decode(file_get_contents("php://input"));
             $course_id = $data->course_ID;
             $course_data = array(
+                'course_name' => $data->course_Name,
                 'course_description' => $data->course_Description,
                 'category_id' => $data->category_ID,
                 'teacher_id' => $data->teacher_ID
@@ -418,9 +419,10 @@ class Course extends CI_Controller
             //Reloading add course page with same fields if validation fails
             if ($this->form_validation->run() == FALSE) {
                 $error_data = array(
-                    'courseDescription_Error' => form_error('course_Description'),
-                    'categoryID_Error' => form_error('category_ID'),
-                    'teacherID_Error' => form_error('teacher_ID')
+                    'courseName_Error' => form_error('course_name'),
+                    'courseDescription_Error' => form_error('course_description'),
+                    'categoryID_Error' => form_error('category_id'),
+                    'teacherID_Error' => form_error('teacher_id')
                 );
 
                 echo json_encode(array('status' => "error in validation", 'error_messages' => $error_data));

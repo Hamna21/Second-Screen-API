@@ -166,10 +166,6 @@ class Quiz extends CI_Controller
         }
     }
 
-
-
-
-
     //-------------------DASHBOARD-----------
 
     //All quizzes of a particular lecture + lecture name - for pagination purposes
@@ -219,11 +215,12 @@ class Quiz extends CI_Controller
                 return;
             }
 
-
             //Subtracting 12 hours from time - TO adjust it according to server
             $updated_date = strtotime($quiz_data['quiz_time']);
             $updated_date = $updated_date - (12 * 60 * 60); //Subtracting 12 hours
+            $updated_date = $updated_date - (3 * 60); //Subtracting 2 minutes
             $notification_date  = date("Y-m-d H:i:s", $updated_date);
+
 
             //Extracting date,month,time, hour of quiz time
             $notification_date = new DateTime($notification_date);
@@ -257,6 +254,7 @@ class Quiz extends CI_Controller
         if ($this->input->server('REQUEST_METHOD') == "POST") {
             $data = json_decode(file_get_contents("php://input"));
             $quiz_id = $data->quiz_id;
+            $lecture_id = $data->lecture_id;
             $quiz_data = array(
                 'quiz_title' => $data->quiz_title,
                 'quiz_time' => $data->quiz_time,
@@ -272,10 +270,43 @@ class Quiz extends CI_Controller
                 return;
             }
 
-            if ($this->Quiz_model->updateQuiz($quiz_id,$quiz_data)) {
+
+            //Subtracting 12 hours from time - TO adjust it according to server
+            $updated_date = strtotime($quiz_data['quiz_time']);
+            $updated_date = $updated_date - (12 * 60 * 60); //Subtracting 12 hours
+            $updated_date = $updated_date - (3 * 60); //Subtracting 2 minutes
+            $notification_date  = date("Y-m-d H:i:s", $updated_date);
+
+            //Extracting date,month,time, hour of quiz time
+            $notification_date = new DateTime($notification_date);
+            $month = $notification_date->format('m');
+            $day = $notification_date->format('d');
+            $hour = $notification_date->format('H');
+            $minute = $notification_date->format('i');
+
+            //Formatting string - Adding 0 in case of single digit
+            $month = sprintf("%02s", $month);
+            $day = sprintf("%02s", $day);
+            $hour = sprintf("%02s", $hour);
+            $minute = sprintf("%02s", $minute);
+
+            if ($this->Quiz_model->updateQuiz($quiz_id,$quiz_data))
+            {
+
+                //Removing previous cronjob from crontab
+                removeQuizNotification($quiz_id);
+
+                //Removing cronjobs from table
+                $this->Cronjob_model->deleteJob($quiz_id);
+
+                //Adding new job
+                quizNotification($minute, $hour, $day, $month, $quiz_id,$quiz_data['quiz_title'],$lecture_id);
+
                 echo json_encode(array('status' => "success"));
                 return;
-            } else {
+            }
+            else
+            {
                 echo json_encode(array('status' => "error"));
                 return;
             }

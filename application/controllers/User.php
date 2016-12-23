@@ -42,7 +42,8 @@ class User extends CI_Controller
                 'password' => $data->password
             );
 
-
+            //Checking hashed version of password against DB
+            //$user_data['password'] = password_hash($user_data['password'], PASSWORD_DEFAULT);
             //Validating data
             $this->form_validation->set_data($user_data);
             $this->form_validation->set_rules($this->User_model->getLoginRules());
@@ -57,6 +58,86 @@ class User extends CI_Controller
             if(!$user)
             {
                 echo json_encode(array('status' => "error", "error_message" => "Invalid Email/Password "));
+                return;
+            }
+
+            //Requested a password change - Cannot Log in
+            if($user['isReset'] == 1)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "requested a password change"));
+                return;
+            }
+
+
+            //If user already logged in - then return user
+            if($this->User_model->get_user_session($user['user_id']))
+            {
+                //Updating login time in session table
+                $this->User_model->update_loginTime($user['user_id']);
+                echo json_encode(array('status' => "success", "user" => $user));
+                return;
+            }
+
+            //Setting SESSION_ID
+            $data_session = array(
+                'user_id' => $user['user_id'],
+                'login_time' => date('Y-m-d H:i:s')
+            );
+
+
+            //SESSION SET IN
+            if($this->User_model->insert_session($data_session))
+            {
+                //Setting user-token after successful login
+                if(array_key_exists('user_token', $data))
+                {
+                    $this->User_model->update_token($user['user_id'],$data->user_token);
+                }
+
+                echo json_encode(array('status' => "success", "user" => $user));
+                return;
+            }
+
+            //ERROR IN SETTING SESSION - USER NOT LOGGED IN
+            echo json_encode(array('status' => "error", "error_message" => "couldn't log in user"));
+            return;
+        }
+
+    }
+
+    public function login_hashedPassword()
+    {
+        if($this->input->server('REQUEST_METHOD')== "POST")
+        {
+            $data = json_decode(file_get_contents("php://input"));
+            $user_data = array(
+                'email' => $data->email,
+                'password' => $data->password
+            );
+
+            //Checking hashed version of password against DB
+            //$user_data['password'] = password_hash($user_data['password'], PASSWORD_DEFAULT);
+            //Validating data
+            $this->form_validation->set_data($user_data);
+            $this->form_validation->set_rules($this->User_model->getLoginRules());
+
+            if($this->form_validation->run() == FALSE) {
+                echo json_encode(array('status' => "error", "error_message" => validation_errors()));
+                return;
+            }
+
+            //Getting User
+            $user = $this->User_model->get_user_email($user_data['email']);
+            if(!$user)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "Invalid Email "));
+                return;
+            }
+
+            //Checking hashed version of password
+            if(password_verify($user_data['password'], $user['password']))
+            {
+                echo json_encode(array('status' => "error", "error_message" => "Invalid Password "));
                 return;
             }
 
@@ -132,6 +213,7 @@ class User extends CI_Controller
                 'password' => $this->input->post('password')
             );
 
+
             $this->form_validation->set_data($register_data); //Setting Data
             $this->form_validation->set_rules($this->User_model->getRegistrationRules()); //Setting Rules
 
@@ -147,6 +229,9 @@ class User extends CI_Controller
                 echo json_encode(array('status' => "error", "error_message" => validation_errors()));
                 return;
             }
+
+            //Hashing password and storing it
+            $register_data['password'] = password_hash($register_data['password'], PASSWORD_DEFAULT);
 
             //Setting token if sent
             if(isset($_POST['user_token']) )
@@ -402,7 +487,7 @@ class User extends CI_Controller
                     return;
                 }
 
-                $update_data['course_image'] = $image_attributes[1];
+                $update_data['user_image'] = $image_attributes[1];
             }
 
             //Updating user by matching user_id

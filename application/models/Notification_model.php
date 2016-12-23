@@ -21,6 +21,15 @@ class Notification_model extends CI_Model
 
     }
 
+    //Get total count of all un-read notifications
+    public function countNotifications($user_id)
+    {
+        $this->db->from('notification');
+        $this->db->where('user_id',$user_id);
+        $this->db->where('notification_status',"false");
+        return $this->db->count_all_results();
+    }
+
     //------INSERT------
 
     //Inserting new Notification in Notification table
@@ -30,6 +39,16 @@ class Notification_model extends CI_Model
         {
             return true;
         }
+    }
+
+
+    //-----------UPDATE------
+
+    //Updating read status of notifications
+    public function updateStatus($notification_id,$notification_status)
+    {
+        $this->db->where('notification_id', $notification_id);
+        $this->db->update('notification', $notification_status);
     }
 }
 

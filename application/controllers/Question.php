@@ -21,6 +21,7 @@ class Question extends CI_Controller
         }
 
         $this->load->model('Question_model');
+        $this->load->model('Quiz_model');
 
         $this->load->helper(array('form', 'url'));
         $this->load->library('form_validation');
@@ -64,8 +65,10 @@ class Question extends CI_Controller
                 return;
             }
 
+            //Sending quiz information along with questions
+            $quiz = $this->Quiz_model->get_quiz_withID($quiz_id);
             $questionTotal = $this->Question_model->getQuestionTotal($quiz_id);
-            echo json_encode(array('status' => "success", "questions" => $questions, "questionTotal" => $questionTotal));
+            echo json_encode(array('status' => "success", "questions" => $questions, "questionTotal" => $questionTotal, "quiz" => $quiz));
             return;
         }
     }

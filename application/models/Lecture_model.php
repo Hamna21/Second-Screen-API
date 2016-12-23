@@ -94,6 +94,18 @@ class Lecture_model extends CI_Model
         return $this->db->get()->row('course_id');
     }
 
+    //Getting course image via Lecture ID
+    public function get_course_image($lecture_id)
+    {
+        $course_id = $this->get_course_id($lecture_id);
+        $this->db
+            ->select('course_thumbimage')
+            ->from('course')
+            ->where('course_id', $course_id);
+        return $this->db->get()->row('course_thumbimage');
+
+    }
+
 
     //---------INSERT-------
     //Inserting new Lecture
@@ -198,8 +210,8 @@ class Lecture_model extends CI_Model
                 'rules' => 'required'
             ),
             array(
-                'field' => 'lecture_start',
-                'label' => 'Lecture Starting Time',
+                'field' => 'lecture_date',
+                'label' => 'Lecture Date and Starting Time',
                 'rules' => 'required'
             ),
             array(

@@ -24,6 +24,7 @@ class Notification extends CI_Controller
 
             //Getting all notifications of a user
             $notifications = $this->Notification_model->get_notifications($user_id);
+
             if(!$notifications)
             {
                 echo json_encode(array('status' => "error", "error_message" => "No notifications found for this user!"));
@@ -40,12 +41,40 @@ class Notification extends CI_Controller
                     $notifications[$key]['flag']= $quiz_result['status'];
                     $notifications[$key]['quiz_duration']= $quiz_result['quiz_duration'];
                 }
+
+                //When API hit 1st time, status returned will be false (not read) but changed to true (read) on back end
+                //On next API hit, true status will be returned
+                //Checking status of notification - if it is not-read then change to read, otherwise don't change
+                if($notification['notification_status'] == "false")
+                {
+                    $notification_status = array('notification_status'=> 'true');
+                    $this->Notification_model->updateStatus($notification['notification_id'],$notification_status);
+                }
+
             }
 
             echo json_encode(array('status' => "success", "notifications" => $notifications));
             return;
         }
     }
+
+    //Getting total count of un-read (false)notifications
+    public function count_notifications()
+    {
+        if($this->input->server('REQUEST_METHOD') == "GET")
+        {
+            $user_id = $this->input->get('user_id');
+            $notificationTotal = $this->Notification_model->countNotifications($user_id);
+            if(!$notificationTotal)
+            {
+                echo json_encode(array('status' => "success", "message" => "No un-read notifications."));
+                return;
+            }
+            echo json_encode(array('status' => "success", "notification_count" => "$notificationTotal"));
+            return;
+        }
+    }
+
 
     //Lecture Notification - 10 minutes prior
     public function sendLectureRequest()
@@ -78,6 +107,7 @@ class Notification extends CI_Controller
                 $notification_data = array(
                     "user_id" => $user['user_id'],
                     "notification_time" => date('Y:m:d H:i:s'),
+                    "notification_status" => "false",
                     "type" => "lecture",
                     "id" => $lecture_id,
                     "title" => $lecture_name,
@@ -113,6 +143,7 @@ class Notification extends CI_Controller
                     $notification_data = array(
                         "user_id" => $user['user_id'],
                         "notification_time" => date('Y:m:d H:i:s'),
+                        "notification_status" => "false",
                         "type" => "lecture",
                         "id" => $lecture_id,
                         "title" => $lecture_name,
@@ -150,6 +181,7 @@ class Notification extends CI_Controller
                  $notification_data = array(
                      "user_id" => $user['user_id'],
                      "notification_time" => date('Y:m:d H:i:s'),
+                     "notification_status" => "false",
                      "type" => "quiz",
                      "id" => $quiz_id,
                      "title" => $quiz_title
@@ -187,6 +219,7 @@ class Notification extends CI_Controller
                      $notification_data = array(
                          "user_id" => $user['user_id'],
                          "notification_time" => date('Y:m:d H:i:s'),
+                         "notification_status" => "false",
                          "type" => "quiz",
                          "id" => $quiz_id,
                          "title" => $quiz_title
@@ -227,6 +260,7 @@ class Notification extends CI_Controller
                 $notification_data = array(
                     "user_id" => $user['user_id'],
                     "notification_time" => date('Y:m:d H:i:s'),
+                    "notification_status" => "false",
                     "type" => "lecture",
                     "id" => $lecture_id,
                     "title" => $lecture_name,
@@ -262,6 +296,7 @@ class Notification extends CI_Controller
                     $notification_data = array(
                         "user_id" => $user['user_id'],
                         "notification_time" => date('Y:m:d H:i:s'),
+                        "notification_status" => "false",
                         "type" => "lecture",
                         "id" => $lecture_id,
                         "title" => $lecture_name,

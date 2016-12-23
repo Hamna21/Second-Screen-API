@@ -21,7 +21,6 @@ class Teacher extends CI_Controller
             die();
         }
 
-        $this->load->model('teacher_model');
         $this->load->model('Teacher_model');
 
         $this->load->helper(array('form', 'url', 'image'));
@@ -88,10 +87,10 @@ class Teacher extends CI_Controller
             //Reloading form page if validation fails
             if ($this->form_validation->run() == FALSE) {
                 $error_data = array(
-                    'teacherName_Error' => form_error('teacher_Name'),
-                    'teacherDesignation_Error' => form_error('teacher_Designation'),
-                    'teacherDomain_Error' => form_error('teacher_Domain'),
-                    'teacherImage_Error' => form_error('image_Path')
+                    'teacherName_Error' => form_error('teacher_name'),
+                    'teacherDesignation_Error' => form_error('teacher_designation'),
+                    'teacherDomain_Error' => form_error('teacher_domain'),
+                    'teacherImage_Error' => form_error('teacher_image')
                 );
 
                 echo json_encode(array('status' => "error in validation", 'error_messages' => $error_data));
@@ -137,9 +136,9 @@ class Teacher extends CI_Controller
             //Reloading form page if validation fails
             if ($this->form_validation->run() == FALSE) {
                 $error_data = array(
-                    'teacherName_Error' => form_error('teacher_Name'),
-                    'teacherDesignation_Error' => form_error('teacher_Designation'),
-                    'teacherDomain_Error' => form_error('teacher_Domain')
+                    'teacherName_Error' => form_error('teacher_name'),
+                    'teacherDesignation_Error' => form_error('teacher_designation'),
+                    'teacherDomain_Error' => form_error('teacher_domain')
                 );
 
                 echo json_encode(array('status' => "Error in Validation", 'error_messages' => $error_data));

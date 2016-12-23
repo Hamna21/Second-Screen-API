@@ -120,10 +120,11 @@ class Category extends CI_Controller
             $this->form_validation->set_rules($this->Category_model->getCategoryRegistrationRules()); //Setting Rules
 
             //Reload add Category page if Validation fails - api validation
-            if ($this->form_validation->run() == FALSE) {
+            if ($this->form_validation->run() == FALSE)
+            {
                 $error_data = array(
-                    'categoryName_Error' => form_error('category_Name'),
-                    'categoryImageError' => form_error('image_Path')
+                    'categoryName_Error' => form_error('category_name'),
+                    'categoryImage_Error' => form_error('category_image')
                 );
 
                 echo json_encode(array('status' => "error in validation", 'error_messages' => $error_data));
@@ -161,19 +162,31 @@ class Category extends CI_Controller
                 'category_name' => $data->category_Name
             );
 
-            /* $this->form_validation->set_data($category_data); //Setting Data
+            $this->form_validation->set_data($category_data); //Setting Data
             $this->form_validation->set_rules($this->Category_model->getCategoryEditRules()); //Setting Rules
 
             //Reloading edit category page if validation fails
-            if ($this->form_validation->run() == FALSE) {
+            if ($this->form_validation->run() == FALSE)
+            {
                 $error_data = array(
-                    'categoryName_Error' => form_error('category_Name')
+                    'categoryName_Error' => form_error('category_name')
                 );
 
-                echo json_encode(array('status' => "Error in Validation", 'error_messages' => $error_data));
+                echo json_encode(array('status' => "error in validation", 'error_messages' => $error_data));
                 return;
             }
-            }*/
+
+            //Checking if category name is not same to any other category name (excluding current entry)
+            //To ensure category unique constraint
+            if($this->Category_model->get_category_name($category_id,$category_data['category_name']))
+            {
+                $error_data = array(
+                    'categoryName_Error' => "Category Name already taken. Try another one!"
+                );
+
+                echo json_encode(array('status' => "error in validation", 'error_messages' => $error_data));
+                return;
+            }
 
             //If new image was uploaded
             if(array_key_exists('category_Image', $data))

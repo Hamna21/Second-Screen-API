@@ -28,6 +28,24 @@ class Category_model extends CI_Model
         return $query->row_array();
     }
 
+    //Getting a category by name - To check unique name constraint
+    public function get_category_name($category_id,$category_name)
+    {
+        $query = $this->db
+            ->where('category_id !=', $category_id)
+            ->where('category_name', $category_name)
+            ->get('category');
+
+        if($query->num_rows() > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     //Return all courses in a specific category
     public function get_courses_category($category_id)
     {
@@ -95,7 +113,7 @@ class Category_model extends CI_Model
     {
         $exist = "Category Name already in database - Try Again!";
         $query = $this->db
-            ->where('category_name',$categoryName )
+            ->where('category_name',$categoryName)
             ->get('category');
 
         if($query->num_rows() > 0)

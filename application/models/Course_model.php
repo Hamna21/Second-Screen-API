@@ -186,7 +186,7 @@ class Course_model extends CI_Model
             array(
                 'field' => 'course_name',
                 'label' => 'Course Name',
-                'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]|is_unique[course.course_Name]'
+                'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]'
             ),
 
             array(
@@ -218,6 +218,11 @@ class Course_model extends CI_Model
     public function getCourseEditRules()
     {
         $config = array(
+            array(
+                'field' => 'course_name',
+                'label' => 'Course Name',
+                'rules' => 'required|regex_match[/^[A-Za-z0-9_ -]+$/]'
+            ),
             array(
                 'field' => 'course_description',
                 'label' => 'Course Description',

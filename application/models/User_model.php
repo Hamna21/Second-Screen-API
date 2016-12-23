@@ -26,6 +26,21 @@ class User_model extends CI_Model
         }
     }
 
+    //Getting user via email
+    public function get_user_email($email)
+    {
+        $query = $this->db
+            ->where('email',  $email )
+            ->get('user');
+
+        if ( $query->num_rows() > 0 ) {
+            $row = $query->row_array();
+            return $row;
+        }
+        else{
+            return null;
+        }
+    }
     //Getting user via hash
     public function get_user_hash($reset_hash)
     {

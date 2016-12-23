@@ -117,6 +117,7 @@ $route['api/reference/add'] = 'Lecture_Reference/addReference'; //Getting a sing
 
 //-----NOTIFICATION------------//
 $route['api/notifications'] = 'Notification/notifications'; //notifications of a user
+$route['api/notifications_count'] = 'Notification/count_notifications'; //unread notifications of a user
 
 
 
@@ -149,6 +150,7 @@ $route['api/category/delete'] = 'Category/deleteCategory'; //admin delete catego
 
 //------------------Lecture-----------------//
 $route['api/lectures/dashboard'] = 'Lecture/lectures_dashboard'; //list of all lectures within limit
+$route['api/lecture_dashboard'] = 'Lecture/lecture_dashboard'; //Getting a single lecture by it's ID - for dashboard
 $route['api/lecture/add'] = 'Lecture/addLecture'; //admin add lecture
 $route['api/lecture/edit'] = 'Lecture/editLecture'; //admin edit lecture
 $route['api/lecture/delete'] = 'Lecture/deleteLecture'; //admin delete lecture
