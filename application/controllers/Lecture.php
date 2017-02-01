@@ -101,19 +101,46 @@ class Lecture extends CI_Controller
             $data = json_decode(file_get_contents("php://input"));
             $limit = $data->limit;
             $start= $data->start;
-            $lectures = $this->Lecture_model->get_lectures_limit($limit, $start);
+            $lectures = $this->Lecture_model->get_lectures_dashboard($limit, $start);
             if(!$lectures)
             {
                 echo json_encode(array('status' => "error", "error_message" => "No lecture found!"));
                 return;
             }
-            $lectureTotal = $this->Lecture_model->getLectureTotal();
-            if(!$lectureTotal)
+            $lecture_total = $this->Lecture_model->getLectureTotal();
+            if(!$lecture_total)
             {
                 echo json_encode(array('status' => "error"));
                 return;
             }
-            echo json_encode(array("status" => "success","lectures" => $lectures, "lectureTotal" => $lectureTotal));
+            echo json_encode(array("status" => "success","lectures" => $lectures, "lecture_total" => $lecture_total));
+            return;
+        }
+    }
+
+    //List of lectures  of a particular teacher specified within limit and total count of lectures of that teacher
+    public function lectures_teacher_dashboard()
+    {
+        if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+            $data = json_decode(file_get_contents("php://input"));
+            $limit = $data->limit;
+            $start= $data->start;
+            $teacher_id = $data->teacher_id;
+
+            $lectures = $this->Lecture_model->get_lecturesOfTeacher_dashboard($limit, $start, $teacher_id);
+            if(!$lectures)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No lecture found!"));
+                return;
+            }
+            $lecture_total = $this->Lecture_model->getLectureTotal_teacher($teacher_id);
+            if(!$lecture_total)
+            {
+                echo json_encode(array('status' => "error"));
+                return;
+            }
+            echo json_encode(array("status" => "success","lectures" => $lectures, "lecture_total" => $lecture_total));
             return;
         }
     }
@@ -281,6 +308,7 @@ class Lecture extends CI_Controller
             $this->form_validation->set_data($lecture_data); //Setting Data
             $this->form_validation->set_rules($this->Lecture_model->getLectureEditRules()); //Setting Rules
 
+
             //Reloading add lecture page if validation fails
             if ($this->form_validation->run() == FALSE) {
                 $error_data = array(
@@ -293,6 +321,12 @@ class Lecture extends CI_Controller
 
                 echo json_encode(array('status' => "error in validation", 'error_messages' => $error_data));
                 return;
+            }
+
+            //Adding Lecture Link
+            if(array_key_exists('lecture_video_link', $data))
+            {
+                $lecture_data['lecture_video'] = $data->lecture_video_link;
             }
 
 

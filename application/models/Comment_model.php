@@ -14,6 +14,20 @@ class Comment_model extends CI_Model
         $query = $this->db
             ->select('user_id, comment_text, comment_time')
             ->where('course_id', $course_id)
+            ->order_by('comment_time', 'DESC')
+            ->get('comment');
+
+        return $query->result_array();
+    }
+
+    //Showing comments of a course within limit for pagination
+    public function get_comments_dashboard($limit,$start,$course_id)
+    {
+        $query = $this->db
+            ->limit($limit, $start)
+            ->select('user_id, comment_text, comment_time')
+            ->where('course_id', $course_id)
+            ->order_by('comment_time', 'DESC')
             ->get('comment');
 
         return $query->result_array();
@@ -29,6 +43,13 @@ class Comment_model extends CI_Model
         $query = $this->db->get();
         return $query->result_array();
 
+    }
+
+    public function get_commentsTotal($course_id)
+    {
+        $this->db->from('comment');
+        $this->db->where('course_id', $course_id);
+        return $this->db->count_all_results();
     }
 
     //Adding comment
@@ -47,9 +68,30 @@ class Comment_model extends CI_Model
         $query = $this->db
             ->select('user_id, comment_text, comment_time')
             ->where('lecture_id', $lecture_id)
+            ->order_by('comment_time', 'DESC')
             ->get('comment_lecture');
 
         return $query->result_array();
+    }
+
+    //Showing comments of a lecture withing limit for pagination
+    public function get_commentsLecture_dashboard($limit, $start, $lecture_id)
+    {
+        $query = $this->db
+            ->limit($limit, $start)
+            ->select('user_id, comment_text, comment_time')
+            ->where('lecture_id', $lecture_id)
+            ->order_by('comment_time', 'DESC')
+            ->get('comment_lecture');
+
+        return $query->result_array();
+    }
+
+    public function get_lectureComment_total($lecture_id)
+    {
+        $this->db->from('comment_lecture');
+        $this->db->where('lecture_id', $lecture_id);
+        return $this->db->count_all_results();
     }
 
     //Adding comment of lecture

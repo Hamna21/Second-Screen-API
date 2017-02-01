@@ -110,25 +110,6 @@ class User_model extends CI_Model
         }
     }
 
-    //Getting USER/ADMIN for login
-    public function get_login_admin($data)
-    {
-        $query = $this->db
-            ->where('email',  $data['email'] )
-            ->where('password', $data['password'])
-            ->get('admin');
-
-        if ( $query->num_rows() > 0 )
-        {
-            $row = $query->row_array();
-            return $row;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
     //Checking if Hash is valid for password reset
     public function isValidHash($hash)
     {
@@ -155,6 +136,28 @@ class User_model extends CI_Model
 
         $query = $this->db->get();
         return $query->result_array();
+    }
+
+
+    //--------------------------ADMIN------------------------
+    //Getting USER/ADMIN for login
+    public function get_login_admin($data)
+    {
+        $query = $this->db
+           ->where('email',  $data['email'] )
+           ->where('password', $data['password'])
+            ->get('user_dashboard');
+
+
+        if ( $query->num_rows() > 0 )
+        {
+            $row = $query->row_array();
+            return $row;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 

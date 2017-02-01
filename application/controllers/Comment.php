@@ -95,7 +95,7 @@ class Comment extends CI_Controller
     {
         if($this->input->server('REQUEST_METHOD') == "GET")
         {
-            //Getting comments of a course!
+            //Getting comments of a lecture!
             $lecture_id = $this->input->get('lecture_id');
             $comments = $this->Comment_model->get_comments_lecture($lecture_id);
             if(!$comments)
@@ -149,6 +149,78 @@ class Comment extends CI_Controller
             echo json_encode(array('status' => "error", "error_message" => "Couldn't insert comment"));
             return;
 
+        }
+    }
+
+    //-------------------------DASHBOARD------------------------------------------------//
+
+    //---------COURSE-----------------
+    public function comments_course_dashboard()
+    {
+        if($this->input->server('REQUEST_METHOD') == "POST")
+        {
+            //Getting comments of a course
+            $data = json_decode(file_get_contents("php://input"));
+            $limit = $data->limit;
+            $start = $data->start;
+            $course_id = $data->course_id;
+
+            $comments = $this->Comment_model->get_comments_dashboard($limit, $start, $course_id);
+            if(!$comments)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No comments found in this course!"));
+                return;
+            }
+
+            $comment_total = $this->Comment_model->get_commentsTotal($course_id);
+            $myArray = array();
+            foreach($comments as $comment)
+            {
+                //Getting user of each comment
+                $user = $this->User_model->get_user_id($comment['user_id']);
+                $user = array('user_id' => $user['user_id'], 'user_name' => $user['user_name'], 'user_image' => $user['user_image']  );
+                $comment['user'] = $user;
+                $myArray[] = $comment;
+
+            }
+
+            echo json_encode(array('status' => "success", "comments" => $myArray, "comment_total" => $comment_total));
+            return;
+        }
+    }
+
+    //---------LECTURE-----------------
+    public function comments_lecture_dashboard()
+    {
+        if($this->input->server('REQUEST_METHOD') == "POST")
+        {
+            //Getting comments of a lecture!
+            $data = json_decode(file_get_contents("php://input"));
+            $limit = $data->limit;
+            $start = $data->start;
+            $lecture_id = $data->lecture_id;
+
+            $comments = $this->Comment_model->get_commentsLecture_dashboard($limit,$start,$lecture_id);
+            if(!$comments)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No comments found in this lecture!"));
+                return;
+            }
+
+            $comment_total = $this->Comment_model->get_lectureComment_total($lecture_id);
+            $myArray = array();
+            foreach($comments as $comment)
+            {
+                //Getting user of each comment
+                $user = $this->User_model->get_user_id($comment['user_id']);
+                $user = array('user_id' => $user['user_id'], 'user_name' => $user['user_name'], 'user_image' => $user['user_image']  );
+                $comment['user'] = $user;
+                $myArray[] = $comment;
+
+            }
+
+            echo json_encode(array('status' => "success", "comments" => $myArray, "comment_total" => $comment_total));
+            return;
         }
     }
 

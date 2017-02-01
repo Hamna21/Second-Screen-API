@@ -53,6 +53,8 @@ $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+//------------------------------------------API--------------------------------------------//
+
 
 //--------------Login/Signup-----------------------//
 
@@ -112,7 +114,7 @@ $route['api/quiz/questions/notification'] = 'Quiz/quiz_questions'; //questions o
 
 
 //-----REFERENCE----------------//
-$route['api/reference/add'] = 'Lecture_Reference/addReference'; //Getting a single lecture by it's ID
+$route['api/reference/add'] = 'Lecture_Reference/addReference'; //Adding lecture's reference
 
 
 //-----NOTIFICATION------------//
@@ -139,6 +141,10 @@ $route['api/course/delete'] = 'Course/deleteCourse'; //admin delete course
 $route['api/course/join'] = 'Course/course_join'; //
 $route['api/categories_teachers'] = 'Course/categories_teachers_Course'; //Categories and Teachers information
 
+//------Teacher Admin-------
+$route['api/courses_teacher/dashboard'] = 'Course/courses_teacher_dashboard'; //list of all course of a teacher within limit
+
+
 
 //------------------Category-----------------//
 $route['api/category'] = 'Category/category';  //Single category
@@ -154,6 +160,9 @@ $route['api/lecture_dashboard'] = 'Lecture/lecture_dashboard'; //Getting a singl
 $route['api/lecture/add'] = 'Lecture/addLecture'; //admin add lecture
 $route['api/lecture/edit'] = 'Lecture/editLecture'; //admin edit lecture
 $route['api/lecture/delete'] = 'Lecture/deleteLecture'; //admin delete lecture
+
+//-------------Teacher Admin-------
+$route['api/lectures_teacher/dashboard'] = 'Lecture/lectures_teacher_dashboard'; //list of all lectures of a teacher within limit
 
 
 //------------------Teacher-----------------//
@@ -181,5 +190,15 @@ $route['api/question/delete'] = 'Question/deleteQuestion'; //admin delete questi
 
 $route['api/quiz/questions'] = 'Question/questions'; //questions of a quiz
 $route['api/quiz/questions_pagination'] = 'Question/questions_pagination'; //questions of a quiz for pagination
+
+//---------REFERENCE--------------------------//
+$route['api/reference/add'] = 'Lecture_Reference/addReference'; //Adding lecture's reference
+$route['api/reference/edit'] = 'Lecture_Reference/editReference'; //Editing lecture's reference
+$route['api/reference/delete'] = 'Lecture_Reference/deleteReference'; //Deleting lecture's reference
+$route['api/lecture/reference_pagination'] = 'Lecture_Reference/references_pagination'; //Getting references for pagination
+
+//-----------COMMENTS------------------------//
+$route['api/course/comments_dashboard'] = 'Comment/comments_course_dashboard'; //All comments of a course
+$route['api/lecture/comments_dashboard'] = 'Comment/comments_lecture_dashboard'; //All comments of a lecture
 
 

@@ -32,7 +32,7 @@ class User extends CI_Controller
     }
 
     //---------USER---------
-    public function login()
+    public function login_old()
     {
         if($this->input->server('REQUEST_METHOD')== "POST")
         {
@@ -42,8 +42,6 @@ class User extends CI_Controller
                 'password' => $data->password
             );
 
-            //Checking hashed version of password against DB
-            //$user_data['password'] = password_hash($user_data['password'], PASSWORD_DEFAULT);
             //Validating data
             $this->form_validation->set_data($user_data);
             $this->form_validation->set_rules($this->User_model->getLoginRules());
@@ -105,20 +103,18 @@ class User extends CI_Controller
 
     }
 
-    public function login_hashedPassword()
+    public function login()
     {
         if($this->input->server('REQUEST_METHOD')== "POST")
         {
             $data = json_decode(file_get_contents("php://input"));
-            $user_data = array(
+            $login_data = array(
                 'email' => $data->email,
                 'password' => $data->password
             );
 
-            //Checking hashed version of password against DB
-            //$user_data['password'] = password_hash($user_data['password'], PASSWORD_DEFAULT);
             //Validating data
-            $this->form_validation->set_data($user_data);
+            $this->form_validation->set_data($login_data);
             $this->form_validation->set_rules($this->User_model->getLoginRules());
 
             if($this->form_validation->run() == FALSE) {
@@ -126,20 +122,24 @@ class User extends CI_Controller
                 return;
             }
 
-            //Getting User
-            $user = $this->User_model->get_user_email($user_data['email']);
+            //Getting User from Database if email matches
+            $user = $this->User_model->get_user_email($login_data['email']);
             if(!$user)
             {
-                echo json_encode(array('status' => "error", "error_message" => "Invalid Email "));
+                echo json_encode(array('status' => "error", "error_message" => "Invalid Email/Password"));
                 return;
             }
 
             //Checking hashed version of password
-            if(password_verify($user_data['password'], $user['password']))
+            if(!(password_verify($login_data['password'], $user['password'])))
             {
-                echo json_encode(array('status' => "error", "error_message" => "Invalid Password "));
+                echo json_encode(array('status' => "error", "error_message" => "Invalid Email/Password "));
                 return;
             }
+
+            //On successful match, removing password from array
+            //No need to return password
+            unset($user['password']);
 
             //Requested a password change - Cannot Log in
             if($user['isReset'] == 1)
@@ -231,7 +231,7 @@ class User extends CI_Controller
             }
 
             //Hashing password and storing it
-            $register_data['password'] = password_hash($register_data['password'], PASSWORD_DEFAULT);
+            $register_data['password'] = password_hash($register_data['password'], PASSWORD_BCRYPT);
 
             //Setting token if sent
             if(isset($_POST['user_token']) )
@@ -603,7 +603,7 @@ class User extends CI_Controller
             }
             else
             {
-                echo json_encode(array('status' => "success", "admin" => $admin));
+                echo json_encode(array('status' => "success", "user_dashboard" => $admin));
                 return;
             }
         }

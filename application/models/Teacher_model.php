@@ -53,9 +53,20 @@ class Teacher_model extends CI_Model
     {
         if($this->db->insert('teacher', $teacherData))
         {
+            $insert_id = $this->db->insert_id();
+            return $insert_id;
+        }
+    }
+
+    //Inserting teacher in user_dashboard
+    public function insert_teacher_admin($user_dashboard_data)
+    {
+        if ($this->db->insert("user_dashboard", $user_dashboard_data))
+        {
             return true;
         }
     }
+
 
     //---------UPDATE-------
     //Update a teacher by its ID
@@ -86,6 +97,11 @@ class Teacher_model extends CI_Model
                 'field' => 'teacher_name',
                 'label' => 'Teacher Name',
                 'rules' => 'required'
+            ),
+            array(
+                'field' => 'teacher_email',
+                'label' => 'Teacher Email',
+                'rules' => 'trim|required|valid_email'
             ),
             array(
                 'field' => 'teacher_designation',

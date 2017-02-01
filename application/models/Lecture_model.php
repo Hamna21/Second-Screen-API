@@ -9,6 +9,7 @@ class Lecture_model extends CI_Model
     }
 
     //--------SELECT-------
+
     //Viewing lectures of a course!
     public function get_course_lectures($course_id)
     {
@@ -27,8 +28,23 @@ class Lecture_model extends CI_Model
         return $this->db->count_all_results();
     }
 
+    //Getting total count of Lectures
+    public function getLectureTotal_teacher($teacher_id)
+    {
+       // $this->db->from('lecture');
+        ////$this->db->join('course','lecture.course_id = course.course_id');
+        //$this->db->where('course.teacher_id', $teacher_id);
+
+
+        $query = $this->db->query('SELECT * FROM lecture WHERE course_id IN(SELECT course_id FROM course WHERE teacher_id='.$teacher_id. ')');
+        //$this->db->query('SELECT * FROM LECTURE WHERE course_id IN (SELECT * FROM course)');
+        //log_message('error',"Lecture Number------> ".$query->num_rows());
+       // return $this->db->count_all_results();
+        return $query->num_rows();
+    }
+
     //Getting lectures in limit - for pagination purposes
-    public function get_lectures_limit($limit, $start)
+    public function get_lectures_dashboard($limit, $start)
     {
         $this->db->limit($limit, $start);
         $this->db->from('lecture');
@@ -37,6 +53,19 @@ class Lecture_model extends CI_Model
         $query = $this->db->get();
         return $query->result_array();
     }
+
+    //Getting lectures in limit - for pagination purposes
+    public function get_lecturesOfTeacher_dashboard($limit, $start, $teacher_id)
+    {
+        $this->db->limit($limit, $start);
+        $this->db->from('lecture');
+        $this->db->join('course', 'lecture.course_id = course.course_id');
+        $this->db->where('course.teacher_id', $teacher_id);
+        $this->db->order_by('lecture_id', 'DESC');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
 
     //Getting all lectures of a course
     public function get_lectures($course_id)

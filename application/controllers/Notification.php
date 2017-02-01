@@ -132,8 +132,6 @@ class Notification extends CI_Controller
 
                     'to' => $user['user_token']
                 );
-
-                //Checking if user is logged in -only then send notification
                 $response = (Requests::post($url, $headers, json_encode($fields)));
                 $result = json_decode($response->body);
                 $status = $result->success;
@@ -152,6 +150,8 @@ class Notification extends CI_Controller
 
                     $this->Notification_model->insertNotification($notification_data);
                 }
+
+                //Removing cronjob for this specific notification
 
             }
 

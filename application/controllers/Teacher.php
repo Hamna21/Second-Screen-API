@@ -22,6 +22,7 @@ class Teacher extends CI_Controller
         }
 
         $this->load->model('Teacher_model');
+        $this->load->model('User_model');
 
         $this->load->helper(array('form', 'url', 'image'));
         $this->load->library('form_validation');
@@ -76,6 +77,7 @@ class Teacher extends CI_Controller
             $data = json_decode(file_get_contents("php://input"));
             $teacher_data = array(
                 'teacher_name' => $data->teacher_Name,
+                'teacher_email' => $data->teacher_email,
                 'teacher_designation' => $data->teacher_Designation,
                 'teacher_domain' => $data->teacher_Domain,
                 'teacher_image' => $data->teacher_Image
@@ -88,6 +90,7 @@ class Teacher extends CI_Controller
             if ($this->form_validation->run() == FALSE) {
                 $error_data = array(
                     'teacherName_Error' => form_error('teacher_name'),
+                    'teacherEmail_Error' => form_error('teacher_email'),
                     'teacherDesignation_Error' => form_error('teacher_designation'),
                     'teacherDomain_Error' => form_error('teacher_domain'),
                     'teacherImage_Error' => form_error('teacher_image')
@@ -106,7 +109,23 @@ class Teacher extends CI_Controller
             $teacher_data['teacher_image'] =  $imageName;
             $teacher_data['teacher_thumbimage'] =  createThumbnail($imageName);
 
-            if ($this->Teacher_model->insertTeacher($teacher_data)) {
+            //Getting id of inserted teacher
+            //storing teacher data in user_dashboard_table
+            $teacher_id = $this->Teacher_model->insertTeacher($teacher_data);
+            if ($teacher_id)
+            {
+                $user_dashboard = array(
+                    'user_dashboard_name' =>$teacher_data['teacher_name'],
+                    'email'=>$teacher_data['teacher_email'],
+                    'password'=> '123456',
+                    'user_dashboard_type' => 'teacher',
+                    'teacher_id'=> $teacher_id
+                );
+
+                //Inserting teacher in user_dashboard
+                $this->Teacher_model->insert_teacher_admin($user_dashboard);
+
+
                 echo json_encode(array('status' => "success"));
                 return;
             }

@@ -83,7 +83,6 @@ class Course extends CI_Controller
         }
     }
 
-
     public function search_course()
     {
         if($this->input->server("REQUEST_METHOD") == "POST") {
@@ -295,21 +294,21 @@ class Course extends CI_Controller
         {
             $data = json_decode(file_get_contents("php://input"));
             $limit = $data->limit;
-            $start= $data->start;
+            $start = $data->start;
 
-            $courses = $this->Course_model->get_courses_limit($limit, $start);
+            $courses = $this->Course_model->get_courses_dashboard($limit, $start);
             if(!$courses)
             {
                 echo json_encode(array('status' => "error", "error_message" => "No course found!"));
                 return;
             }
-            $courseTotal = $this->Course_model->getCourseTotal();
-            if(!$courseTotal)
+            $course_total = $this->Course_model->getCourseTotal();
+            if(!$course_total)
             {
                 echo json_encode(array('status' => "error"));
                 return;
             }
-            echo json_encode(array("status" => "success","courses" => $courses, "courseTotal" => $courseTotal));
+            echo json_encode(array("status" => "success","courses" => $courses, "course_total" => $course_total));
             return;
         }
     }
@@ -482,6 +481,34 @@ class Course extends CI_Controller
             echo json_encode(array('status' => "error"));
             return;
 
+        }
+
+    }
+
+    //All courses of a particular teacher and total count of those course - for dashboard
+    public function courses_teacher_dashboard()
+    {
+        if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+            $data = json_decode(file_get_contents("php://input"));
+            $limit = $data->limit;
+            $start= $data->start;
+            $teacher_id = $data->teacher_id;
+
+            $courses = $this->Course_model->get_coursesOfTeacher_dashboard($limit, $start, $teacher_id);
+            if(!$courses)
+            {
+                echo json_encode(array('status' => "error", "error_message" => "No course found!"));
+                return;
+            }
+            $course_total = $this->Course_model->getCourseTotal_teacher($teacher_id);
+            if(!$course_total)
+            {
+                echo json_encode(array('status' => "error"));
+                return;
+            }
+            echo json_encode(array("status" => "success","courses" => $courses, "course_total" => $course_total));
+            return;
         }
 
     }

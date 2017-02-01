@@ -31,16 +31,37 @@ class Course_model extends CI_Model
         return $query->result_array();
     }
 
-    //Get all courses within limit for pagination
-    public function get_courses_limit($limit, $start)
+    //Get all courses within limit for dashboard - pagination
+    public function get_courses_dashboard($limit, $start)
     {
         $this->db->limit($limit, $start);
         $this->db->from('course');
+        $this->db->join('category', 'course.category_id = category.category_id');
+        $this->db->join('teacher', 'course.teacher_id = teacher.teacher_id');
+        $this->db->order_by('course_id', 'DESC');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+    //Get all courses of a particular teacher within limit for pagination
+    public function get_coursesOfTeacher_dashboard($limit, $start, $teacher_id)
+    {
+        $this->db->limit($limit, $start);
+        $this->db->from('course');
+        $this->db->where('course.teacher_id', $teacher_id);
         $this->db->join('category', 'course.category_id= category.category_id');
         $this->db->join('teacher', 'course.teacher_id= teacher.teacher_id');
         $this->db->order_by('course_id', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
+    }
+
+    //Getting total count of courses of a particular teacher
+    public function getCourseTotal_teacher($teacher_id)
+    {
+        $this->db->from('course');
+        $this->db->where('teacher_id', $teacher_id);
+        return $this->db->count_all_results();
     }
 
     //Return a course by name
@@ -115,7 +136,7 @@ class Course_model extends CI_Model
 
     }
 
-    //------INSERT----------
+    //----------------------INSERT--------------------------------//
     //Adding course of a user!
     public function insert_user_course($data)
     {
@@ -142,7 +163,7 @@ class Course_model extends CI_Model
         return true;
     }
 
-    //-------------DELETE-------------------//
+    //---------------------DELETE-------------------------------//
 
     //Delete a course by its ID
     public function deleteCourse($courseID)
