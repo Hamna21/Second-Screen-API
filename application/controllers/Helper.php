@@ -9,7 +9,7 @@ class Helper extends CI_Controller
         header('Content-Type: application/json');
 
         $this->load->model('Helper_model');
-        $this->load->helper(array('url'));
+        $this->load->helper(array('url', 'video'));
     }
     //Checking if Name is already in DB - AJAX Helper function
     public function categoryNameExist()
@@ -17,6 +17,27 @@ class Helper extends CI_Controller
         $categoryName = $_REQUEST["q"];
         $result = $this->Helper_model->getCategory_Name($categoryName);
         echo $result;
+    }
+
+    public function videoUpload()
+    {
+        //$lecture_id = $this->input->get('lecture_id');
+        set_time_limit(0);
+        //Validating video and uploading it
+        $video_attributes = uploadVideo();
+        $videoUploadStatus = $video_attributes[0];
+
+        //If videoValidation fails, then exit!
+        if ($videoUploadStatus == 0)
+        {
+            echo "Not Uploaded";
+            return;
+        }
+
+        //Setting video uploaded path
+        $video_name = $video_attributes[1];
+        echo "Uploaded";
+        return;
     }
 
     public function deleteImages()

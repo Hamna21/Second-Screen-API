@@ -41,7 +41,6 @@ class Reference_model extends CI_Model
 
     }
 
-
     //Getting all reference of a lecture - including name of reference lecture name
     public function get_references_lecture2($lecture_id)
     {
@@ -63,6 +62,14 @@ class Reference_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+
+    //Getting all references with no audio
+    public function get_references_noAudio()
+    {
+        $query = $this->db->query('SELECT lecture_reference.reference_id,lecture_reference.type FROM lecture_reference WHERE reference_id NOT IN(SELECT source_id FROM audio WHERE type !="quiz")');
+        return $query->result_array();
+    }
+
     //---------INSERT-------
     //Inserting new Reference
     public function insertReference($referenceData)

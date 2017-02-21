@@ -108,7 +108,8 @@ class Category extends CI_Controller
     //Add a new Category in table
     public function addCategory()
     {
-        if ($this->input->server('REQUEST_METHOD') == "POST") {
+        if ($this->input->server('REQUEST_METHOD') == "POST")
+        {
             $data = json_decode(file_get_contents("php://input"));
 
             $category_data = array(

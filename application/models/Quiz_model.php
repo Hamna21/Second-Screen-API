@@ -55,6 +55,7 @@ class Quiz_model extends CI_Model
         return $query->result_array();
     }
 
+    //Getting total count of all quizzes of a lecture
     public function get_quizTotal($lecture_id)
     {
         $this->db->from('quiz');
@@ -62,6 +63,12 @@ class Quiz_model extends CI_Model
         return $this->db->count_all_results();
     }
 
+    //All quizzes with no audio
+    public function get_quizzes_noAudio()
+    {
+        $query = $this->db->query('SELECT (quiz_id) FROM quiz WHERE quiz_id NOT IN(SELECT source_id FROM audio WHERE type="quiz") ORDER BY quiz_id ASC');
+        return $query->result_array();
+    }
 
     //----------------QUIZ_RESULT-----------------------
 
@@ -105,6 +112,14 @@ class Quiz_model extends CI_Model
     public function insert_quizResult($quiz_data)
     {
         $this->db->insert('quiz_result', $quiz_data);
+    }
+
+    //Inserting audio of quiz + reference
+    public function insert_Audio($audio_data)
+    {
+        $this->db->insert('audio', $audio_data);
+        return true;
+
     }
 
 

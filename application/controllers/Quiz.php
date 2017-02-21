@@ -24,8 +24,9 @@ class Quiz extends CI_Controller
         $this->load->model('Lecture_model');
         $this->load->model('Question_model');
         $this->load->model('Course_model');
+        $this->load->model('Reference_model');
 
-        $this->load->helper(array('form', 'url', 'crontab'));
+        $this->load->helper(array('form', 'url', 'crontab', 'audio'));
         $this->load->library('form_validation');
     }
 
@@ -70,7 +71,6 @@ class Quiz extends CI_Controller
             return;
         }
     }
-
 
     //A quiz with all questions - NOTIFICATION PURPOSES
     //If user already attempted the quiz, then return the result
@@ -119,7 +119,6 @@ class Quiz extends CI_Controller
         }
     }
 
-
     //Response of quiz after user submits
     public function quiz_response()
     {
@@ -166,7 +165,67 @@ class Quiz extends CI_Controller
         }
     }
 
-    //-------------------DASHBOARD-----------
+
+    //------------------AUDIO--------------------------------------
+
+    //Quizzes and references (lecture+video+simulation) with no audio generated yet
+    public function resources_noAudio()
+    {
+        if($this->input->server('REQUEST_METHOD') == 'GET')
+        {
+            //Quizzes with no audio
+            $quizzes = $this->Quiz_model->get_quizzes_noAudio();
+
+            //References with no audio
+            $references = $this->Reference_model->get_references_noAudio();
+
+
+            echo json_encode(array('status' => "success", "quizzes" => $quizzes, "references" => $references));
+            return;
+        }
+    }
+
+    //Uploading audio of a quiz and reference (lecture + video + simulation)
+    public function add_Audio()
+    {
+        if($this->input->server('REQUEST_METHOD') == 'POST')
+        {
+           $source_id = $this->input->post('id');
+           $type = $this->input->post('type');
+
+            //Validating video and uploading it
+            $audio_attributes = uploadAudio();
+            $audioUploadStatus = $audio_attributes[0];
+
+            //If audioValidation fails, then exit!
+            if ($audioUploadStatus == 0)
+            {
+                echo json_encode(array('status' => "error", 'error_message' => $audio_attributes[1]));
+                return;
+            }
+
+            //Setting audio uploaded path
+            $audio_Name = $audio_attributes[1];
+            $audio_data = array(
+                'source_id' => $source_id,
+                'type' => $type,
+                'value' => $audio_Name
+            );
+
+            //Uploading audio data in DB
+            if($this->Quiz_model->insert_Audio($audio_data))
+            {
+                echo json_encode(array('status' => "success", 'message' => 'Audio inserted successfully'));
+                return;
+            }
+            echo json_encode(array('status' => "error", 'error_messages' => 'Error in inserting audio'));
+            return;
+        }
+    }
+
+
+
+    //-------------------DASHBOARD---------------------------------
 
     //All quizzes of a particular lecture + lecture name - for pagination purposes
     public function quizzes_pagination()

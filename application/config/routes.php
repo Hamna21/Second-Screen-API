@@ -183,6 +183,14 @@ $route['api/lecture/quiz'] = 'Quiz/quizzes'; //quizzes of a lecture
 $route['api/lecture/quiz_pagination'] = 'Quiz/quizzes_pagination'; //quizzes of a lecture
 
 
+
+
+//--------------------------AUDIO---------------------
+$route['api/add/audio'] = 'Quiz/add_Audio'; //Adding audio of quiz
+$route['api/resources/audio'] = 'Quiz/resources_noAudio';
+
+
+
 //------------------Question-----------------//
 $route['api/question/add'] = 'Question/addQuestion'; //admin add question
 $route['api/question/edit'] = 'Question/editQuestion'; //admin edit question
